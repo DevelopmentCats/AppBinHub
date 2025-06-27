@@ -1,8 +1,45 @@
 {
   "metadata": {
-    "last_updated": "2025-06-26T18:07:18.655214+00:00",
-    "total_applications": 0,
+    "last_updated": "2025-06-27T20:45:28.936698+00:00",
+    "total_applications": 1,
     "version": "1.0.0"
   },
-  "applications": []
+  "applications": [
+    {
+      "id": "direct-api-cursor-ai-editor",
+      "name": "Cursor AI Editor",
+      "description": "AI-powered code editor built for programming with artificial intelligence",
+      "version": "1.1.6",
+      "category": [
+        "programming"
+      ],
+      "appimage": {
+        "url": "https://downloads.cursor.com/production/5b19bac7a947f54e4caa3eb7e4c5fbf832389853/linux/x64/Cursor-1.1.6-x86_64.AppImage",
+        "size": "182.0 MB",
+        "checksum": "sha256:4f4bc946cd78b537d3da4aa7ad058f15754221c50b3c8b9dd4911fce3a9c1083"
+      },
+      "converted_packages": {
+        "deb": {
+          "status": "tool_unavailable"
+        },
+        "rpm": {
+          "status": "pending"
+        }
+      },
+      "metadata": {
+        "icon": "https://us1.discourse-cdn.com/flex020/uploads/cursor1/original/2X/a/a4f78589d63edd61a2843306f8e11bad9590f0ca.png",
+        "desktop_file": "",
+        "executable": "",
+        "mime_types": []
+      },
+      "source": {
+        "website": "https://cursor.com",
+        "api_url": "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable",
+        "commit_sha": "5b19bac7a947f54e4caa3eb7e4c5fbf832389853",
+        "release_date": "2025-06-27T20:45:28.590634+00:00"
+      },
+      "last_updated": "2025-06-27T20:45:28.590661+00:00",
+      "conversion_status": "failed"
+    }
+  ]
 }

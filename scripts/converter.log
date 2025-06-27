@@ -112,3 +112,13 @@
 2025-06-27 20:08:17,637 - INFO - Downloaded AppImage: /tmp/tmpo7wlhi5e/validate-x86_64.AppImage
 2025-06-27 20:08:17,644 - ERROR - Failed to convert: AppImageCommunity-AppImageUpdate-validate-x86_64
 2025-06-27 20:08:17,645 - INFO - Conversion complete. Success: 0, Failed: 8
+2025-06-27 20:45:29,226 - WARNING - appimage2deb tool not found
+2025-06-27 20:45:29,251 - INFO - alien tool is available for RPM conversion
+2025-06-27 20:45:29,254 - INFO - dpkg-deb tool is available for package validation
+2025-06-27 20:45:29,254 - INFO - Starting package conversion process
+2025-06-27 20:45:29,254 - INFO - Found 1 applications to convert
+2025-06-27 20:45:29,254 - INFO - Converting application: direct-api-cursor-ai-editor
+2025-06-27 20:45:29,255 - INFO - Downloading AppImage from: https://downloads.cursor.com/production/5b19bac7a947f54e4caa3eb7e4c5fbf832389853/linux/x64/Cursor-1.1.6-x86_64.AppImage
+2025-06-27 20:45:31,219 - INFO - Downloaded AppImage: /tmp/tmppspfbzir/Cursor-1.1.6-x86_64.AppImage
+2025-06-27 20:45:31,255 - ERROR - Failed to convert: direct-api-cursor-ai-editor
+2025-06-27 20:45:31,256 - INFO - Conversion complete. Success: 0, Failed: 1
