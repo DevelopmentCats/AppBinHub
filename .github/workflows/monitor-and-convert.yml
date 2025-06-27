@@ -1,0 +1,122 @@
+name: AppImage Monitor and Convert
+
+on:
+  schedule:
+    # Run every 4 hours
+    - cron: '0 */4 * * *'
+  workflow_dispatch:
+    # Allow manual triggering
+  push:
+    branches: [ main ]
+    paths: 
+      - 'scripts/**'
+      - '.github/workflows/monitor-and-convert.yml'
+
+jobs:
+  monitor-and-convert:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+    
+    - name: Install Python dependencies
+      run: |
+        cd scripts
+        pip install -r requirements.txt
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y alien dpkg-dev
+        
+        # Install appimage2deb via Snap
+        sudo snap install appimage2deb
+        
+        # Verify installations
+        appimage2deb --version || echo "appimage2deb installation failed"
+        alien --version || echo "alien installation failed"
+        dpkg-deb --version || echo "dpkg-deb not available"
+    
+    - name: Configure Git
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action Bot"
+    
+    - name: Run AppImage monitoring
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        cd scripts
+        python monitor.py
+      continue-on-error: true
+    
+    - name: Run package conversion
+      run: |
+        cd scripts
+        python converter.py
+      continue-on-error: true
+    
+    - name: Check for changes
+      id: verify-changed-files
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        else
+          echo "changed=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Commit and push changes
+      if: steps.verify-changed-files.outputs.changed == 'true'
+      run: |
+        git add .
+        git commit -m "Update application data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+        git push
+    
+    - name: Upload conversion logs
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: conversion-logs
+        path: |
+          scripts/*.log
+        retention-days: 7
+    
+    - name: Create summary
+      if: always()
+      run: |
+        echo "## AppImage Monitor and Convert Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "- **Python Version:** $(python --version)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Tools Status:**" >> $GITHUB_STEP_SUMMARY
+        echo "  - appimage2deb: $(appimage2deb --version 2>/dev/null || echo 'Not available')" >> $GITHUB_STEP_SUMMARY
+        echo "  - alien: $(alien --version 2>/dev/null | head -1 || echo 'Not available')" >> $GITHUB_STEP_SUMMARY
+        echo "  - dpkg-deb: $(dpkg-deb --version 2>/dev/null | head -1 || echo 'Not available')" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f scripts/monitor.log ]; then
+          echo "- **Monitor Log (last 10 lines):**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -10 scripts/monitor.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        if [ -f scripts/converter.log ]; then
+          echo "- **Converter Log (last 10 lines):**" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -10 scripts/converter.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+        fi
