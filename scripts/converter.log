@@ -36,3 +36,41 @@
 2025-06-27 18:07:25,208 - INFO - Downloaded AppImage: /tmp/tmp6bo50c8_/validate-x86_64.AppImage
 2025-06-27 18:07:25,215 - ERROR - Failed to convert: AppImageCommunity-AppImageUpdate-validate-x86_64
 2025-06-27 18:07:25,216 - INFO - Conversion complete. Success: 0, Failed: 8
+2025-06-27 18:26:43,258 - WARNING - appimage2deb tool not found
+2025-06-27 18:26:43,284 - INFO - alien tool is available for RPM conversion
+2025-06-27 18:26:43,286 - INFO - dpkg-deb tool is available for package validation
+2025-06-27 18:26:43,287 - INFO - Starting package conversion process
+2025-06-27 18:26:43,287 - INFO - Found 8 applications to convert
+2025-06-27 18:26:43,287 - INFO - Converting application: AppImage-AppImageKit-appimagetool-x86_64
+2025-06-27 18:26:43,287 - INFO - Downloading AppImage from: https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+2025-06-27 18:26:43,677 - INFO - Downloaded AppImage: /tmp/tmp5yxj3u58/appimagetool-x86_64.AppImage
+2025-06-27 18:26:43,679 - ERROR - Failed to convert: AppImage-AppImageKit-appimagetool-x86_64
+2025-06-27 18:26:43,679 - INFO - Converting application: AppImageCommunity-pkg2appimage-pkg2appimage-1eceb30-x86_64
+2025-06-27 18:26:43,679 - INFO - Downloading AppImage from: https://github.com/AppImageCommunity/pkg2appimage/releases/download/continuous/pkg2appimage-1eceb30-x86_64.AppImage
+2025-06-27 18:26:44,119 - INFO - Downloaded AppImage: /tmp/tmpvu9g3vsw/pkg2appimage-1eceb30-x86_64.AppImage
+2025-06-27 18:26:44,122 - ERROR - Failed to convert: AppImageCommunity-pkg2appimage-pkg2appimage-1eceb30-x86_64
+2025-06-27 18:26:44,122 - INFO - Converting application: AppImageCommunity-AppImageUpdate-appimageupdate-i686
+2025-06-27 18:26:44,122 - INFO - Downloading AppImage from: https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/AppImageUpdate-i686.AppImage
+2025-06-27 18:26:44,722 - INFO - Downloaded AppImage: /tmp/tmpe9uahyaa/AppImageUpdate-i686.AppImage
+2025-06-27 18:26:44,732 - ERROR - Failed to convert: AppImageCommunity-AppImageUpdate-appimageupdate-i686
+2025-06-27 18:26:44,732 - INFO - Converting application: AppImageCommunity-AppImageUpdate-appimageupdate-x86_64
+2025-06-27 18:26:44,732 - INFO - Downloading AppImage from: https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/AppImageUpdate-x86_64.AppImage
+2025-06-27 18:26:45,272 - INFO - Downloaded AppImage: /tmp/tmp7rtzvwab/AppImageUpdate-x86_64.AppImage
+2025-06-27 18:26:45,281 - ERROR - Failed to convert: AppImageCommunity-AppImageUpdate-appimageupdate-x86_64
+2025-06-27 18:26:45,281 - INFO - Converting application: AppImageCommunity-AppImageUpdate-appimageupdatetool-i686
+2025-06-27 18:26:45,282 - INFO - Downloading AppImage from: https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/appimageupdatetool-i686.AppImage
+2025-06-27 18:26:45,806 - INFO - Downloaded AppImage: /tmp/tmp35sfv2wj/appimageupdatetool-i686.AppImage
+2025-06-27 18:26:45,813 - ERROR - Failed to convert: AppImageCommunity-AppImageUpdate-appimageupdatetool-i686
+2025-06-27 18:26:45,813 - INFO - Converting application: AppImageCommunity-AppImageUpdate-appimageupdatetool-x86_64
+2025-06-27 18:26:45,813 - INFO - Downloading AppImage from: https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/appimageupdatetool-x86_64.AppImage
+2025-06-27 18:26:46,316 - INFO - Downloaded AppImage: /tmp/tmpug5calj5/appimageupdatetool-x86_64.AppImage
+2025-06-27 18:26:46,324 - ERROR - Failed to convert: AppImageCommunity-AppImageUpdate-appimageupdatetool-x86_64
+2025-06-27 18:26:46,324 - INFO - Converting application: AppImageCommunity-AppImageUpdate-validate-i686
+2025-06-27 18:26:46,324 - INFO - Downloading AppImage from: https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/validate-i686.AppImage
+2025-06-27 18:26:46,811 - INFO - Downloaded AppImage: /tmp/tmpasqtcu7r/validate-i686.AppImage
+2025-06-27 18:26:46,817 - ERROR - Failed to convert: AppImageCommunity-AppImageUpdate-validate-i686
+2025-06-27 18:26:46,818 - INFO - Converting application: AppImageCommunity-AppImageUpdate-validate-x86_64
+2025-06-27 18:26:46,818 - INFO - Downloading AppImage from: https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/validate-x86_64.AppImage
+2025-06-27 18:26:47,846 - INFO - Downloaded AppImage: /tmp/tmp96adhb0h/validate-x86_64.AppImage
+2025-06-27 18:26:47,853 - ERROR - Failed to convert: AppImageCommunity-AppImageUpdate-validate-x86_64
+2025-06-27 18:26:47,853 - INFO - Conversion complete. Success: 0, Failed: 8

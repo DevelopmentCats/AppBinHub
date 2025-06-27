@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "last_updated": "2025-06-27T18:07:18.655214+00:00",
+    "last_updated": "2025-06-27T18:26:42.974866+00:00",
     "total_applications": 8,
     "version": "1.0.0"
   },
@@ -27,8 +27,8 @@
         }
       },
       "metadata": {
-        "icon": "/tmp/tmptqtte54e/extracted/squashfs-root/appimagetool.png",
-        "desktop_file": "{'name': 'appimagetool', 'description': 'Tool to generate AppImages from AppDirs', 'executable': 'appimagetool', 'icon': 'appimagetool', 'categories': ['Development'], 'mime_types': [], 'icon_path': '/tmp/tmptqtte54e/extracted/squashfs-root/appimagetool.png'}",
+        "icon": "/tmp/tmpyz0m2zqi/extracted/squashfs-root/appimagetool.png",
+        "desktop_file": "{'name': 'appimagetool', 'description': 'Tool to generate AppImages from AppDirs', 'executable': 'appimagetool', 'icon': 'appimagetool', 'categories': ['Development'], 'mime_types': [], 'icon_path': '/tmp/tmpyz0m2zqi/extracted/squashfs-root/appimagetool.png'}",
         "executable": "appimagetool",
         "mime_types": []
       },
@@ -37,7 +37,7 @@
         "release_tag": "continuous",
         "release_date": "2023-03-08T23:25:46+00:00"
       },
-      "last_updated": "2025-06-27T18:06:49.135665+00:00",
+      "last_updated": "2025-06-27T18:26:25.091850+00:00",
       "conversion_status": "failed"
     },
     {
@@ -62,8 +62,8 @@
         }
       },
       "metadata": {
-        "icon": "/tmp/tmpvwbd546c/extracted/squashfs-root/appimagetool.png",
-        "desktop_file": "{'name': 'pkg2appimage', 'description': 'Create AppImages from Debian/Ubuntu repositories', 'executable': 'pkg2appimage', 'icon': 'appimagetool', 'categories': ['Development'], 'mime_types': [], 'icon_path': '/tmp/tmpvwbd546c/extracted/squashfs-root/appimagetool.png'}",
+        "icon": "/tmp/tmpwm5byd2s/extracted/squashfs-root/appimagetool.png",
+        "desktop_file": "{'name': 'pkg2appimage', 'description': 'Create AppImages from Debian/Ubuntu repositories', 'executable': 'pkg2appimage', 'icon': 'appimagetool', 'categories': ['Development'], 'mime_types': [], 'icon_path': '/tmp/tmpwm5byd2s/extracted/squashfs-root/appimagetool.png'}",
         "executable": "pkg2appimage",
         "mime_types": []
       },
@@ -72,7 +72,7 @@
         "release_tag": "continuous",
         "release_date": "2025-02-02T08:42:37+00:00"
       },
-      "last_updated": "2025-06-27T18:06:52.841495+00:00",
+      "last_updated": "2025-06-27T18:26:27.895651+00:00",
       "conversion_status": "failed"
     },
     {
@@ -97,8 +97,8 @@
         }
       },
       "metadata": {
-        "icon": "/tmp/tmpptui0fji/extracted/squashfs-root/appimage.png",
-        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Update applications distributed in AppImage format', 'executable': 'AppImageUpdate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmpptui0fji/extracted/squashfs-root/appimage.png'}",
+        "icon": "/tmp/tmpdvmf5vvr/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Update applications distributed in AppImage format', 'executable': 'AppImageUpdate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmpdvmf5vvr/extracted/squashfs-root/appimage.png'}",
         "executable": "AppImageUpdate",
         "mime_types": []
       },
@@ -107,7 +107,7 @@
         "release_tag": "continuous",
         "release_date": "2025-05-16T23:45:53+00:00"
       },
-      "last_updated": "2025-06-27T18:07:00.978362+00:00",
+      "last_updated": "2025-06-27T18:26:32.726187+00:00",
       "conversion_status": "failed"
     },
     {
@@ -132,8 +132,8 @@
         }
       },
       "metadata": {
-        "icon": "/tmp/tmph_fwd12a/extracted/squashfs-root/appimage.png",
-        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Update applications distributed in AppImage format', 'executable': 'AppImageUpdate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmph_fwd12a/extracted/squashfs-root/appimage.png'}",
+        "icon": "/tmp/tmp9jf4j52a/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Update applications distributed in AppImage format', 'executable': 'AppImageUpdate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmp9jf4j52a/extracted/squashfs-root/appimage.png'}",
         "executable": "AppImageUpdate",
         "mime_types": []
       },
@@ -142,7 +142,7 @@
         "release_tag": "continuous",
         "release_date": "2025-05-16T23:45:53+00:00"
       },
-      "last_updated": "2025-06-27T18:07:03.049144+00:00",
+      "last_updated": "2025-06-27T18:26:33.967447+00:00",
       "conversion_status": "failed"
     },
     {
@@ -167,8 +167,8 @@
         }
       },
       "metadata": {
-        "icon": "/tmp/tmphyr2ut8h/extracted/squashfs-root/appimage.png",
-        "desktop_file": "{'name': 'appimageupdatetool', 'description': '', 'executable': 'appimageupdatetool', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmphyr2ut8h/extracted/squashfs-root/appimage.png'}",
+        "icon": "/tmp/tmp5b1d1xrw/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'appimageupdatetool', 'description': '', 'executable': 'appimageupdatetool', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmp5b1d1xrw/extracted/squashfs-root/appimage.png'}",
         "executable": "appimageupdatetool",
         "mime_types": []
       },
@@ -177,7 +177,7 @@
         "release_tag": "continuous",
         "release_date": "2025-05-16T23:45:53+00:00"
       },
-      "last_updated": "2025-06-27T18:07:08.157619+00:00",
+      "last_updated": "2025-06-27T18:26:36.411383+00:00",
       "conversion_status": "failed"
     },
     {
@@ -202,8 +202,8 @@
         }
       },
       "metadata": {
-        "icon": "/tmp/tmpv8gi66m2/extracted/squashfs-root/appimage.png",
-        "desktop_file": "{'name': 'appimageupdatetool', 'description': '', 'executable': 'appimageupdatetool', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmpv8gi66m2/extracted/squashfs-root/appimage.png'}",
+        "icon": "/tmp/tmp5o5rchbr/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'appimageupdatetool', 'description': '', 'executable': 'appimageupdatetool', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmp5o5rchbr/extracted/squashfs-root/appimage.png'}",
         "executable": "appimageupdatetool",
         "mime_types": []
       },
@@ -212,7 +212,7 @@
         "release_tag": "continuous",
         "release_date": "2025-05-16T23:45:53+00:00"
       },
-      "last_updated": "2025-06-27T18:07:09.401635+00:00",
+      "last_updated": "2025-06-27T18:26:37.408991+00:00",
       "conversion_status": "failed"
     },
     {
@@ -237,8 +237,8 @@
         }
       },
       "metadata": {
-        "icon": "/tmp/tmptru_k9tm/extracted/squashfs-root/appimage.png",
-        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Validate the built-in signature of AppImages', 'executable': 'validate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmptru_k9tm/extracted/squashfs-root/appimage.png'}",
+        "icon": "/tmp/tmp5k83j28d/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Validate the built-in signature of AppImages', 'executable': 'validate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmp5k83j28d/extracted/squashfs-root/appimage.png'}",
         "executable": "validate",
         "mime_types": []
       },
@@ -247,7 +247,7 @@
         "release_tag": "continuous",
         "release_date": "2025-05-16T23:45:53+00:00"
       },
-      "last_updated": "2025-06-27T18:07:14.681559+00:00",
+      "last_updated": "2025-06-27T18:26:41.072572+00:00",
       "conversion_status": "failed"
     },
     {
@@ -272,8 +272,8 @@
         }
       },
       "metadata": {
-        "icon": "/tmp/tmp11pamp0v/extracted/squashfs-root/appimage.png",
-        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Validate the built-in signature of AppImages', 'executable': 'validate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmp11pamp0v/extracted/squashfs-root/appimage.png'}",
+        "icon": "/tmp/tmpvvgx5b7a/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Validate the built-in signature of AppImages', 'executable': 'validate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmpvvgx5b7a/extracted/squashfs-root/appimage.png'}",
         "executable": "validate",
         "mime_types": []
       },
@@ -282,7 +282,7 @@
         "release_tag": "continuous",
         "release_date": "2025-05-16T23:45:53+00:00"
       },
-      "last_updated": "2025-06-27T18:07:17.817155+00:00",
+      "last_updated": "2025-06-27T18:26:42.143850+00:00",
       "conversion_status": "failed"
     }
   ]
