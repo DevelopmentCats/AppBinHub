@@ -1,0 +1,141 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+    paths: 
+      - 'website/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+    # Allow manual deployment
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Validate website structure
+        run: |
+          echo "Validating website structure..."
+          
+          # Check if required files exist
+          if [ ! -f "website/index.html" ]; then
+            echo "Error: website/index.html not found"
+            exit 1
+          fi
+          
+          # Check if data directory exists
+          if [ ! -d "website/data" ]; then
+            echo "Warning: website/data directory not found, creating it"
+            mkdir -p website/data
+          fi
+          
+          # Check if applications.json exists, create empty one if not
+          if [ ! -f "website/data/applications.json" ]; then
+            echo "Warning: applications.json not found, creating empty structure"
+            cat > website/data/applications.json << 'EOF'
+          {
+            "metadata": {
+              "last_updated": "$(date -u '+%Y-%m-%dT%H:%M:%SZ')",
+              "total_applications": 0,
+              "version": "1.0.0"
+            },
+            "applications": []
+          }
+          EOF
+          fi
+          
+          # Validate JSON files
+          echo "Validating JSON files..."
+          for json_file in website/data/*.json; do
+            if [ -f "$json_file" ]; then
+              if ! python3 -m json.tool "$json_file" > /dev/null; then
+                echo "Error: Invalid JSON in $json_file"
+                exit 1
+              else
+                echo "Valid JSON: $json_file"
+              fi
+            fi
+          done
+          
+          echo "Website structure validation complete"
+      
+      - name: Optimize assets
+        run: |
+          echo "Optimizing website assets..."
+          
+          # Create assets directory if it doesn't exist
+          mkdir -p website/assets/icons
+          
+          # Count and report file sizes
+          echo "Website directory contents:"
+          du -sh website/* 2>/dev/null || echo "No files to measure"
+          
+          # Check total website size
+          total_size=$(du -sh website | cut -f1)
+          echo "Total website size: $total_size"
+          
+          # Warn if approaching GitHub Pages limits
+          size_bytes=$(du -sb website | cut -f1)
+          if [ "$size_bytes" -gt 900000000 ]; then  # 900MB warning threshold
+            echo "Warning: Website size approaching 1GB GitHub Pages limit"
+          fi
+      
+      - name: Build with Jekyll (if needed)
+        run: |
+          # Check if this is a Jekyll site
+          if [ -f "website/_config.yml" ]; then
+            echo "Jekyll site detected, building..."
+            cd website
+            bundle install
+            bundle exec jekyll build --destination _site
+          else
+            echo "Static site detected, no build step needed"
+          fi
+      
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./website
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      
+      - name: Create deployment summary
+        run: |
+          echo "## GitHub Pages Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployment URL:** ${{ steps.deployment.outputs.page_url }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deployment Time:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ✅ Successfully deployed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps" >> $GITHUB_STEP_SUMMARY
+          echo "- Visit the deployed site to verify functionality" >> $GITHUB_STEP_SUMMARY
+          echo "- Check that all JSON data is loading correctly" >> $GITHUB_STEP_SUMMARY
+          echo "- Verify responsive design across different devices" >> $GITHUB_STEP_SUMMARY
