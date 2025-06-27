@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "last_updated": "2025-06-27T20:45:28.936698+00:00",
+    "last_updated": "2025-06-27T20:53:58.869578+00:00",
     "total_applications": 1,
     "version": "1.0.0"
   },
@@ -36,9 +36,9 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable",
         "commit_sha": "5b19bac7a947f54e4caa3eb7e4c5fbf832389853",
-        "release_date": "2025-06-27T20:45:28.590634+00:00"
+        "release_date": "2025-06-27T20:53:58.521410+00:00"
       },
-      "last_updated": "2025-06-27T20:45:28.590661+00:00",
+      "last_updated": "2025-06-27T20:53:58.521437+00:00",
       "conversion_status": "failed"
     }
   ]
