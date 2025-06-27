@@ -42,6 +42,18 @@ APPIMAGE_REPOSITORIES = [
     # during the monitoring process
 ]
 
+# Direct API endpoints for applications that don't use GitHub releases
+DIRECT_API_ENDPOINTS = {
+    "cursor": {
+        "name": "Cursor AI Editor",
+        "api_url": "https://www.cursor.com/api/download?platform=linux-x64&releaseTrack=stable",
+        "category": "programming",
+        "description": "AI-powered code editor built for programming with artificial intelligence",
+        "website": "https://cursor.com",
+        "icon_url": "https://us1.discourse-cdn.com/flex020/uploads/cursor1/original/2X/a/a4f78589d63edd61a2843306f8e11bad9590f0ca.png"
+    }
+}
+
 # Additional repositories that commonly host AppImages
 COMMON_APPIMAGE_HOSTS = [
     # These are patterns/organizations known to host AppImages
