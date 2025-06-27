@@ -35,3 +35,77 @@
 2025-06-27 18:07:17,853 - INFO - Monitoring repository: AppImageCommunity/libappimage
 2025-06-27 18:07:18,655 - INFO - Added 8 new applications, updated 0 existing
 2025-06-27 18:07:18,656 - INFO - Monitoring complete. Processed 8 applications
+2025-06-27 18:26:20,607 - INFO - Starting AppImage repository monitoring
+2025-06-27 18:26:20,808 - INFO - GitHub API rate limit: 4989 requests remaining
+2025-06-27 18:26:20,808 - INFO - Monitoring repository: AppImage/AppImageKit
+2025-06-27 18:26:22,523 - INFO - Processing AppImage: appimagetool-aarch64.AppImage
+2025-06-27 18:26:23,100 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmpiuznepau/appimagetool-aarch64.AppImage'
+2025-06-27 18:26:23,102 - INFO - Processing AppImage: appimagetool-armhf.AppImage
+2025-06-27 18:26:23,590 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmp02dfdw4g/appimagetool-armhf.AppImage'
+2025-06-27 18:26:23,592 - INFO - Processing AppImage: appimagetool-i686.AppImage
+2025-06-27 18:26:24,289 - ERROR - Failed to extract AppImage: /tmp/tmp244yfweh/appimagetool-i686.AppImage: error while loading shared libraries: libz.so.1: cannot open shared object file: No such file or directory
+
+2025-06-27 18:26:24,291 - INFO - Processing AppImage: appimagetool-x86_64.AppImage
+2025-06-27 18:26:25,110 - INFO - Monitoring repository: AppImageCommunity/pkg2appimage
+2025-06-27 18:26:26,418 - INFO - Processing AppImage: pkg2appimage-1eceb30-aarch64.AppImage
+2025-06-27 18:26:26,952 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmpv8tx1pnk/pkg2appimage-1eceb30-aarch64.AppImage'
+2025-06-27 18:26:26,955 - INFO - Processing AppImage: pkg2appimage-1eceb30-x86_64.AppImage
+2025-06-27 18:26:27,925 - INFO - Monitoring repository: AppImageCommunity/AppImageUpdate
+2025-06-27 18:26:29,267 - INFO - Processing AppImage: AppImageUpdate-aarch64.AppImage
+2025-06-27 18:26:29,979 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmp9b9e3cwm/AppImageUpdate-aarch64.AppImage'
+2025-06-27 18:26:29,989 - INFO - Processing AppImage: AppImageUpdate-armhf.AppImage
+2025-06-27 18:26:31,495 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmp6myy3hsd/AppImageUpdate-armhf.AppImage'
+2025-06-27 18:26:31,504 - INFO - Processing AppImage: AppImageUpdate-i686.AppImage
+2025-06-27 18:26:32,777 - INFO - Processing AppImage: AppImageUpdate-x86_64.AppImage
+2025-06-27 18:26:34,020 - INFO - Processing AppImage: appimageupdatetool-aarch64.AppImage
+2025-06-27 18:26:34,668 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmp3q4w4eux/appimageupdatetool-aarch64.AppImage'
+2025-06-27 18:26:34,675 - INFO - Processing AppImage: appimageupdatetool-armhf.AppImage
+2025-06-27 18:26:35,349 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmp53etnk2e/appimageupdatetool-armhf.AppImage'
+2025-06-27 18:26:35,356 - INFO - Processing AppImage: appimageupdatetool-i686.AppImage
+2025-06-27 18:26:36,448 - INFO - Processing AppImage: appimageupdatetool-x86_64.AppImage
+2025-06-27 18:26:37,448 - INFO - Processing AppImage: validate-aarch64.AppImage
+2025-06-27 18:26:38,108 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmpgjoi79x4/validate-aarch64.AppImage'
+2025-06-27 18:26:38,115 - INFO - Processing AppImage: validate-armhf.AppImage
+2025-06-27 18:26:39,508 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmpqscp5chq/validate-armhf.AppImage'
+2025-06-27 18:26:39,515 - INFO - Processing AppImage: validate-i686.AppImage
+2025-06-27 18:26:41,110 - INFO - Processing AppImage: validate-x86_64.AppImage
+2025-06-27 18:26:42,180 - INFO - Monitoring repository: AppImageCommunity/libappimage
+2025-06-27 18:26:42,974 - INFO - Added 0 new applications, updated 8 existing
+2025-06-27 18:26:42,975 - INFO - Monitoring complete. Processed 8 applications
+2025-06-27 20:08:03,470 - INFO - Starting AppImage repository monitoring
+2025-06-27 20:08:03,553 - INFO - GitHub API rate limit: 5000 requests remaining
+2025-06-27 20:08:03,553 - INFO - Monitoring repository: AppImage/AppImageKit
+2025-06-27 20:08:05,178 - INFO - Processing AppImage: appimagetool-aarch64.AppImage
+2025-06-27 20:08:05,360 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmpwpttwqy5/appimagetool-aarch64.AppImage'
+2025-06-27 20:08:05,361 - INFO - Processing AppImage: appimagetool-armhf.AppImage
+2025-06-27 20:08:05,587 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmpzyxix0yk/appimagetool-armhf.AppImage'
+2025-06-27 20:08:05,588 - INFO - Processing AppImage: appimagetool-i686.AppImage
+2025-06-27 20:08:05,756 - ERROR - Failed to extract AppImage: /tmp/tmpd3bgfte0/appimagetool-i686.AppImage: error while loading shared libraries: libz.so.1: cannot open shared object file: No such file or directory
+
+2025-06-27 20:08:05,758 - INFO - Processing AppImage: appimagetool-x86_64.AppImage
+2025-06-27 20:08:06,253 - INFO - Monitoring repository: AppImageCommunity/pkg2appimage
+2025-06-27 20:08:07,215 - INFO - Processing AppImage: pkg2appimage-1eceb30-aarch64.AppImage
+2025-06-27 20:08:07,436 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmp7068qs6_/pkg2appimage-1eceb30-aarch64.AppImage'
+2025-06-27 20:08:07,439 - INFO - Processing AppImage: pkg2appimage-1eceb30-x86_64.AppImage
+2025-06-27 20:08:08,023 - INFO - Monitoring repository: AppImageCommunity/AppImageUpdate
+2025-06-27 20:08:08,997 - INFO - Processing AppImage: AppImageUpdate-aarch64.AppImage
+2025-06-27 20:08:09,369 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmp7gdplnwb/AppImageUpdate-aarch64.AppImage'
+2025-06-27 20:08:09,379 - INFO - Processing AppImage: AppImageUpdate-armhf.AppImage
+2025-06-27 20:08:09,720 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmpfpjl52_0/AppImageUpdate-armhf.AppImage'
+2025-06-27 20:08:09,729 - INFO - Processing AppImage: AppImageUpdate-i686.AppImage
+2025-06-27 20:08:10,691 - INFO - Processing AppImage: AppImageUpdate-x86_64.AppImage
+2025-06-27 20:08:11,454 - INFO - Processing AppImage: appimageupdatetool-aarch64.AppImage
+2025-06-27 20:08:11,737 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmpsg8xg_cx/appimageupdatetool-aarch64.AppImage'
+2025-06-27 20:08:11,744 - INFO - Processing AppImage: appimageupdatetool-armhf.AppImage
+2025-06-27 20:08:12,021 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmpi3fp8hk6/appimageupdatetool-armhf.AppImage'
+2025-06-27 20:08:12,028 - INFO - Processing AppImage: appimageupdatetool-i686.AppImage
+2025-06-27 20:08:12,864 - INFO - Processing AppImage: appimageupdatetool-x86_64.AppImage
+2025-06-27 20:08:13,511 - INFO - Processing AppImage: validate-aarch64.AppImage
+2025-06-27 20:08:13,769 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmpabq4zhka/validate-aarch64.AppImage'
+2025-06-27 20:08:13,775 - INFO - Processing AppImage: validate-armhf.AppImage
+2025-06-27 20:08:14,031 - ERROR - Error extracting AppImage metadata: [Errno 8] Exec format error: '/tmp/tmpjqyjiprc/validate-armhf.AppImage'
+2025-06-27 20:08:14,038 - INFO - Processing AppImage: validate-i686.AppImage
+2025-06-27 20:08:14,697 - INFO - Processing AppImage: validate-x86_64.AppImage
+2025-06-27 20:08:15,282 - INFO - Monitoring repository: AppImageCommunity/libappimage
+2025-06-27 20:08:15,799 - INFO - Added 0 new applications, updated 8 existing
+2025-06-27 20:08:15,800 - INFO - Monitoring complete. Processed 8 applications
