@@ -90,6 +90,7 @@ jobs:
     
     - name: Run package conversion
       run: |
+        export PATH="/snap/bin:$PATH"
         cd scripts
         python converter.py
       continue-on-error: true
