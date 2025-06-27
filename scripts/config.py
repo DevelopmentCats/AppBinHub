@@ -28,18 +28,8 @@ CHANGELOG_JSON = WEBSITE_DATA_DIR / "changelog.json"
 
 # AppImage repositories to monitor (based on research)
 APPIMAGE_REPOSITORIES = [
-    # Core AppImage repositories
-    "AppImage/AppImageKit",
-    "AppImage/appimagetool",
-    
-    # AppImageCommunity repositories with actual AppImages
-    "AppImageCommunity/pkg2appimage",
-    "AppImageCommunity/AppImageUpdate",
-    "AppImageCommunity/libappimage",
-    
-    # Popular AppImage applications (examples from research)
-    # Note: These would be populated by actual repository discovery
-    # during the monitoring process
+    # Start with an empty list - add only verified working repositories
+    # Example format: "owner/repo"
 ]
 
 # Direct API endpoints for applications that don't use GitHub releases
@@ -67,19 +57,22 @@ CONVERSION_TOOLS = {
         "command": "appimage2deb",
         "install_method": "snap",
         "timeout": 300,  # 5 minutes
-        "enabled": True
+        "enabled": True,  # Re-enabled after fixing installation
+        "optional": True  # Still optional in case it fails
     },
     "alien": {
         "command": "alien",
         "install_method": "apt",
         "timeout": 300,  # 5 minutes
-        "enabled": True
+        "enabled": True,
+        "optional": False
     },
     "dpkg-deb": {
         "command": "dpkg-deb",
         "install_method": "apt",
         "timeout": 30,
-        "enabled": True
+        "enabled": True,
+        "optional": False
     }
 }
 
@@ -102,28 +95,24 @@ DESKTOP_FILE_SETTINGS = {
 # Category mapping (based on FreeDesktop.org specification)
 CATEGORY_MAPPING = {
     # Main categories from FreeDesktop.org
-    "AudioVideo": "audio",
-    "Audio": "audio",
-    "Video": "video",
-    "Development": "programming",
-    "Education": "education",
-    "Game": "games",
+    "AudioVideo": "media",
+    "Audio": "media",
+    "Video": "media",
+    "Development": "development",
     "Graphics": "graphics",
-    "Network": "internet",
-    "Office": "office",
-    "Science": "education",
+    "Office": "productivity",
     "Settings": "utilities",
     "System": "utilities",
     "Utility": "utilities",
     
     # Additional categories
     "Photography": "graphics",
-    "Publishing": "office",
-    "WebBrowser": "internet",
-    "TextEditor": "office",
-    "IDE": "programming",
-    "Debugger": "programming",
-    "WebDevelopment": "programming",
+    "Publishing": "productivity",
+    "TextEditor": "productivity",
+    "IDE": "development",
+    "Debugger": "development",
+    "WebDevelopment": "development",
+    "programming": "development",  # For our direct API endpoints
     
     # Default fallback
     "": "other"

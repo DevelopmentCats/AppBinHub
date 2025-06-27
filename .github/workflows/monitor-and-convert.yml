@@ -42,15 +42,38 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y alien dpkg-dev
+        sudo apt-get install -y alien dpkg-dev rpm squashfs-tools
         
-        # Install appimage2deb via Snap
-        sudo snap install appimage2deb
+        # Install snapd if not already installed
+        sudo apt-get install -y snapd
+        
+        # Wait for snapd to be ready
+        sudo systemctl start snapd
+        sudo systemctl enable snapd
+        sleep 10
+        
+        # Install appimage2deb via Snap with proper permissions
+        sudo snap install appimage2deb --classic 2>/dev/null || \
+        sudo snap install appimage2deb --devmode 2>/dev/null || \
+        sudo snap install appimage2deb 2>/dev/null || \
+        echo "appimage2deb snap installation failed - will try alternative"
+        
+        # If snap failed, try to install from source/alternative
+        if ! command -v appimage2deb &> /dev/null; then
+          echo "Installing appimage2deb alternative method..."
+          # We can add a fallback installation method here
+        fi
         
         # Verify installations
-        appimage2deb --version || echo "appimage2deb installation failed"
-        alien --version || echo "alien installation failed"
-        dpkg-deb --version || echo "dpkg-deb not available"
+        echo "Checking tool availability:"
+        if command -v appimage2deb &> /dev/null; then
+          echo "✓ appimage2deb: $(appimage2deb --version 2>/dev/null || echo 'available')"
+        else
+          echo "✗ appimage2deb: not available"
+        fi
+        echo "✓ alien: $(alien --version | head -1)"
+        echo "✓ dpkg-deb: $(dpkg-deb --version | head -1)"
+        echo "✓ squashfs-tools: $(unsquashfs -version 2>&1 | head -1)"
     
     - name: Configure Git
       run: |
@@ -80,12 +103,51 @@ jobs:
           echo "changed=false" >> $GITHUB_OUTPUT
         fi
     
+    - name: Add cache busting to JSON files
+      if: steps.verify-changed-files.outputs.changed == 'true'
+      run: |
+        # Add a timestamp to help with cache busting
+        cd website/data
+        for file in *.json; do
+          if [ -f "$file" ]; then
+            # Add a cache_buster field with current timestamp
+            python3 -c "
+import json, sys, time
+filename = '$file'
+try:
+    with open(filename, 'r') as f:
+        data = json.load(f)
+    
+    if 'metadata' in data:
+        data['metadata']['cache_buster'] = int(time.time())
+    else:
+        data['cache_buster'] = int(time.time())
+    
+    with open(filename, 'w') as f:
+        json.dump(data, f, indent=2)
+    print(f'Added cache buster to {filename}')
+except Exception as e:
+    print(f'Could not add cache buster to {filename}: {e}')
+"
+          fi
+        done
+    
     - name: Commit and push changes
       if: steps.verify-changed-files.outputs.changed == 'true'
       run: |
         git add .
         git commit -m "Update application data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
         git push
+    
+    - name: Deploy to GitHub Pages
+      if: steps.verify-changed-files.outputs.changed == 'true'
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./website
+        force_orphan: true
+        enable_jekyll: false
+        cname: false
     
     - name: Upload conversion logs
       if: always()

@@ -118,7 +118,18 @@ class AppBinHub {
 
     async loadJSON(url) {
         try {
-            const response = await fetch(url);
+            // Add cache busting parameter
+            const cacheBuster = Date.now();
+            const urlWithCacheBuster = `${url}?cb=${cacheBuster}`;
+            
+            const response = await fetch(urlWithCacheBuster, {
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
+            
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
@@ -239,6 +250,9 @@ class AppBinHub {
         
         // Setup analytics
         this.setupAnalytics();
+        
+        // Setup auto-refresh mechanism
+        this.setupAutoRefresh();
     }
 
     updateSearchStats(stats) {
@@ -391,6 +405,64 @@ class AppBinHub {
                 // Ignore localStorage errors
             }
         }, 60000); // Save every minute
+    }
+
+    setupAutoRefresh() {
+        // Check for updates every 5 minutes
+        const checkInterval = 5 * 60 * 1000; // 5 minutes
+        
+        setInterval(async () => {
+            try {
+                // Check if metadata has changed
+                const metadataResponse = await fetch('./data/applications.json?cb=' + Date.now(), {
+                    cache: 'no-cache'
+                });
+                
+                if (metadataResponse.ok) {
+                    const data = await metadataResponse.json();
+                    const newLastUpdated = data.metadata?.last_updated;
+                    const currentLastUpdated = this.data.metadata?.last_updated;
+                    
+                    if (newLastUpdated && newLastUpdated !== currentLastUpdated) {
+                        console.log('Data update detected, refreshing...');
+                        await this.refresh();
+                        this.showNotification('New applications available! Data refreshed.', 'success');
+                    }
+                }
+            } catch (error) {
+                console.log('Auto-refresh check failed:', error);
+                // Silently fail - don't spam users with errors
+            }
+        }, checkInterval);
+
+        // Also check on window focus (when user returns to tab)
+        document.addEventListener('visibilitychange', async () => {
+            if (!document.hidden && this.isInitialized) {
+                // Wait a bit then check for updates
+                setTimeout(async () => {
+                    try {
+                        const metadataResponse = await fetch('./data/applications.json?cb=' + Date.now(), {
+                            cache: 'no-cache'
+                        });
+                        
+                        if (metadataResponse.ok) {
+                            const data = await metadataResponse.json();
+                            const newLastUpdated = data.metadata?.last_updated;
+                            const currentLastUpdated = this.data.metadata?.last_updated;
+                            
+                            if (newLastUpdated && newLastUpdated !== currentLastUpdated) {
+                                console.log('Data update detected on focus, refreshing...');
+                                await this.refresh();
+                                this.showNotification('Data refreshed with latest updates!', 'success');
+                            }
+                        }
+                    } catch (error) {
+                        // Silently fail
+                        console.log('Focus refresh check failed:', error);
+                    }
+                }, 2000); // Wait 2 seconds after focus
+            }
+        });
     }
 
     dispatchReadyEvent() {

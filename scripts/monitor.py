@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 AppImage Repository Monitor Script for AppBinHub
-Monitors GitHub repositories for AppImage releases and extracts metadata
+Monitors GitHub repositories and direct API endpoints for AppImage releases and extracts metadata
 """
 
 import os
@@ -17,6 +17,18 @@ from github import Github
 from configparser import ConfigParser
 import hashlib
 
+# Import configuration
+from config import (
+    APPIMAGE_REPOSITORIES,
+    DIRECT_API_ENDPOINTS,
+    WEBSITE_DATA_DIR,
+    CATEGORY_MAPPING,
+    get_github_token,
+    ensure_directories,
+    map_desktop_category,
+    is_valid_appimage_url
+)
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -30,21 +42,17 @@ logger = logging.getLogger(__name__)
 
 class AppImageMonitor:
     def __init__(self):
-        self.github_token = os.environ.get('GITHUB_TOKEN')
-        if not self.github_token:
-            raise ValueError("GITHUB_TOKEN environment variable is required")
+        # Ensure required directories exist
+        ensure_directories()
         
-        self.github = Github(self.github_token)
-        self.data_dir = Path('../website/data')
-        self.data_dir.mkdir(parents=True, exist_ok=True)
+        # Initialize GitHub API (only if we have repositories to monitor)
+        if APPIMAGE_REPOSITORIES:
+            self.github_token = get_github_token()
+            self.github = Github(self.github_token)
+        else:
+            self.github = None
         
-        # Known AppImage repositories to monitor
-        self.repositories = [
-            'AppImage/AppImageKit',
-            'AppImageCommunity/pkg2appimage',
-            'AppImageCommunity/AppImageUpdate',
-            'AppImageCommunity/libappimage'
-        ]
+        self.data_dir = WEBSITE_DATA_DIR
         
         # Load existing application data
         self.applications_file = self.data_dir / 'applications.json'
@@ -67,6 +75,9 @@ class AppImageMonitor:
     
     def check_rate_limits(self):
         """Check GitHub API rate limits"""
+        if not self.github:
+            return True
+            
         rate_limit = self.github.get_rate_limit()
         remaining = rate_limit.core.remaining
         logger.info(f"GitHub API rate limit: {remaining} requests remaining")
@@ -95,10 +106,39 @@ class AppImageMonitor:
                 appimage_assets.append(asset)
         return appimage_assets
     
+    def fetch_direct_api_data(self, app_config):
+        """Fetch AppImage data from direct API endpoints"""
+        try:
+            response = requests.get(app_config['api_url'], timeout=30)
+            response.raise_for_status()
+            data = response.json()
+            
+            # Extract download URL
+            download_url = data.get('downloadUrl') or data.get('url')
+            if not download_url or not is_valid_appimage_url(download_url):
+                logger.error(f"Invalid or missing AppImage URL in API response for {app_config['name']}")
+                return None
+            
+            # Get file size by making a HEAD request
+            head_response = requests.head(download_url)
+            file_size = int(head_response.headers.get('content-length', 0))
+            
+            return {
+                'version': data.get('version', 'latest'),
+                'download_url': download_url,
+                'file_size': file_size,
+                'commit_sha': data.get('commitSha'),
+                'app_config': app_config
+            }
+            
+        except Exception as e:
+            logger.error(f"Error fetching data from {app_config['api_url']}: {e}")
+            return None
+    
     def download_appimage(self, asset_url, temp_dir):
         """Download AppImage file to temporary directory"""
         try:
-            response = requests.get(asset_url, stream=True)
+            response = requests.get(asset_url, stream=True, timeout=300)
             response.raise_for_status()
             
             filename = asset_url.split('/')[-1]
@@ -233,8 +273,8 @@ class AppImageMonitor:
             size_bytes /= 1024.0
         return f"{size_bytes:.1f} TB"
     
-    def create_application_record(self, repo_name, release, asset, metadata, appimage_path):
-        """Create application record from extracted data"""
+    def create_application_record_from_github(self, repo_name, release, asset, metadata, appimage_path):
+        """Create application record from GitHub release data"""
         app_id = f"{repo_name.replace('/', '-')}-{asset.name.replace('.AppImage', '').lower()}"
         
         record = {
@@ -242,7 +282,7 @@ class AppImageMonitor:
             "name": metadata.get('name', asset.name.replace('.AppImage', '')),
             "description": metadata.get('description', ''),
             "version": release.tag_name,
-            "category": metadata.get('categories', []),
+            "category": [map_desktop_category(cat) for cat in metadata.get('categories', [])],
             "appimage": {
                 "url": asset.browser_download_url,
                 "size": self.format_file_size(asset.size),
@@ -266,6 +306,48 @@ class AppImageMonitor:
                 "repository": f"https://github.com/{repo_name}",
                 "release_tag": release.tag_name,
                 "release_date": release.published_at.isoformat() if release.published_at else None
+            },
+            "last_updated": datetime.now(timezone.utc).isoformat(),
+            "conversion_status": "pending"
+        }
+        
+        return record
+    
+    def create_application_record_from_api(self, api_data, metadata, appimage_path):
+        """Create application record from direct API data"""
+        app_config = api_data['app_config']
+        app_id = f"direct-api-{app_config['name'].lower().replace(' ', '-')}"
+        
+        record = {
+            "id": app_id,
+            "name": app_config['name'],
+            "description": app_config.get('description', ''),
+            "version": api_data['version'],
+            "category": [app_config.get('category', 'other')],
+            "appimage": {
+                "url": api_data['download_url'],
+                "size": self.format_file_size(api_data['file_size']),
+                "checksum": f"sha256:{self.calculate_file_checksum(appimage_path)}"
+            },
+            "converted_packages": {
+                "deb": {
+                    "status": "pending"
+                },
+                "rpm": {
+                    "status": "pending"
+                }
+            },
+            "metadata": {
+                "icon": metadata.get('icon_path', '') if metadata else app_config.get('icon_url', ''),
+                "desktop_file": str(metadata) if metadata else '',
+                "executable": metadata.get('executable', '') if metadata else '',
+                "mime_types": metadata.get('mime_types', []) if metadata else []
+            },
+            "source": {
+                "website": app_config.get('website', ''),
+                "api_url": app_config['api_url'],
+                "commit_sha": api_data.get('commit_sha'),
+                "release_date": datetime.now(timezone.utc).isoformat()
             },
             "last_updated": datetime.now(timezone.utc).isoformat(),
             "conversion_status": "pending"
@@ -303,17 +385,19 @@ class AppImageMonitor:
         with open(self.applications_file, 'w') as f:
             json.dump(self.data, f, indent=2)
     
-    def monitor_repositories(self):
-        """Main monitoring function"""
-        logger.info("Starting AppImage repository monitoring")
+    def monitor_github_repositories(self):
+        """Monitor GitHub repositories for AppImage releases"""
+        if not APPIMAGE_REPOSITORIES or not self.github:
+            logger.info("No GitHub repositories to monitor")
+            return []
         
         if not self.check_rate_limits():
-            logger.error("GitHub API rate limit too low, skipping monitoring")
-            return
+            logger.error("GitHub API rate limit too low, skipping GitHub monitoring")
+            return []
         
         new_records = []
         
-        for repo_name in self.repositories:
+        for repo_name in APPIMAGE_REPOSITORIES:
             logger.info(f"Monitoring repository: {repo_name}")
             
             releases = self.get_repository_releases(repo_name)
@@ -346,15 +430,65 @@ class AppImageMonitor:
                         continue
                     
                     # Create application record
-                    record = self.create_application_record(
+                    record = self.create_application_record_from_github(
                         repo_name, latest_release, asset, metadata, appimage_path
                     )
                     new_records.append(record)
         
+        return new_records
+    
+    def monitor_direct_api_endpoints(self):
+        """Monitor direct API endpoints for AppImage releases"""
+        if not DIRECT_API_ENDPOINTS:
+            logger.info("No direct API endpoints to monitor")
+            return []
+        
+        new_records = []
+        
+        for app_id, app_config in DIRECT_API_ENDPOINTS.items():
+            logger.info(f"Monitoring direct API endpoint: {app_config['name']}")
+            
+            # Fetch data from API
+            api_data = self.fetch_direct_api_data(app_config)
+            if not api_data:
+                continue
+            
+            with tempfile.TemporaryDirectory() as temp_dir:
+                temp_path = Path(temp_dir)
+                
+                # Download AppImage
+                appimage_path = self.download_appimage(api_data['download_url'], temp_path)
+                if not appimage_path:
+                    continue
+                
+                # Extract metadata (optional for direct API endpoints)
+                metadata = self.extract_appimage_metadata(appimage_path)
+                # Don't fail if metadata extraction fails for direct API endpoints
+                
+                # Create application record
+                record = self.create_application_record_from_api(api_data, metadata, appimage_path)
+                new_records.append(record)
+        
+        return new_records
+    
+    def monitor_all_sources(self):
+        """Main monitoring function - monitors both GitHub and direct API sources"""
+        logger.info("Starting AppImage monitoring from all sources")
+        
+        all_records = []
+        
+        # Monitor GitHub repositories
+        github_records = self.monitor_github_repositories()
+        all_records.extend(github_records)
+        
+        # Monitor direct API endpoints
+        api_records = self.monitor_direct_api_endpoints()
+        all_records.extend(api_records)
+        
         # Update data files
-        if new_records:
-            self.update_application_data(new_records)
-            logger.info(f"Monitoring complete. Processed {len(new_records)} applications")
+        if all_records:
+            self.update_application_data(all_records)
+            logger.info(f"Monitoring complete. Processed {len(all_records)} applications")
         else:
             logger.info("No new applications found")
 
@@ -362,7 +496,7 @@ def main():
     """Main entry point"""
     try:
         monitor = AppImageMonitor()
-        monitor.monitor_repositories()
+        monitor.monitor_all_sources()
     except Exception as e:
         logger.error(f"Monitoring failed: {e}")
         raise
