@@ -1,8 +1,289 @@
 {
   "metadata": {
-    "last_updated": "2025-06-27T14:20:41Z",
-    "total_applications": 0,
+    "last_updated": "2025-06-27T18:07:18.655214+00:00",
+    "total_applications": 8,
     "version": "1.0.0"
   },
-  "applications": []
+  "applications": [
+    {
+      "id": "AppImage-AppImageKit-appimagetool-x86_64",
+      "name": "appimagetool",
+      "description": "Tool to generate AppImages from AppDirs",
+      "version": "continuous",
+      "category": [
+        "Development"
+      ],
+      "appimage": {
+        "url": "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage",
+        "size": "8.4 MB",
+        "checksum": "sha256:b90f4a8b18967545fda78a445b27680a1642f1ef9488ced28b65398f2be7add2"
+      },
+      "converted_packages": {
+        "deb": {
+          "status": "tool_unavailable"
+        },
+        "rpm": {
+          "status": "pending"
+        }
+      },
+      "metadata": {
+        "icon": "/tmp/tmptqtte54e/extracted/squashfs-root/appimagetool.png",
+        "desktop_file": "{'name': 'appimagetool', 'description': 'Tool to generate AppImages from AppDirs', 'executable': 'appimagetool', 'icon': 'appimagetool', 'categories': ['Development'], 'mime_types': [], 'icon_path': '/tmp/tmptqtte54e/extracted/squashfs-root/appimagetool.png'}",
+        "executable": "appimagetool",
+        "mime_types": []
+      },
+      "source": {
+        "repository": "https://github.com/AppImage/AppImageKit",
+        "release_tag": "continuous",
+        "release_date": "2023-03-08T23:25:46+00:00"
+      },
+      "last_updated": "2025-06-27T18:06:49.135665+00:00",
+      "conversion_status": "failed"
+    },
+    {
+      "id": "AppImageCommunity-pkg2appimage-pkg2appimage-1eceb30-x86_64",
+      "name": "pkg2appimage",
+      "description": "Create AppImages from Debian/Ubuntu repositories",
+      "version": "continuous",
+      "category": [
+        "Development"
+      ],
+      "appimage": {
+        "url": "https://github.com/AppImageCommunity/pkg2appimage/releases/download/continuous/pkg2appimage-1eceb30-x86_64.AppImage",
+        "size": "13.3 MB",
+        "checksum": "sha256:6f74ec26ba14d2d8f1857d150704f9d585dae30b1ca30ce46f375c157b71d07d"
+      },
+      "converted_packages": {
+        "deb": {
+          "status": "tool_unavailable"
+        },
+        "rpm": {
+          "status": "pending"
+        }
+      },
+      "metadata": {
+        "icon": "/tmp/tmpvwbd546c/extracted/squashfs-root/appimagetool.png",
+        "desktop_file": "{'name': 'pkg2appimage', 'description': 'Create AppImages from Debian/Ubuntu repositories', 'executable': 'pkg2appimage', 'icon': 'appimagetool', 'categories': ['Development'], 'mime_types': [], 'icon_path': '/tmp/tmpvwbd546c/extracted/squashfs-root/appimagetool.png'}",
+        "executable": "pkg2appimage",
+        "mime_types": []
+      },
+      "source": {
+        "repository": "https://github.com/AppImageCommunity/pkg2appimage",
+        "release_tag": "continuous",
+        "release_date": "2025-02-02T08:42:37+00:00"
+      },
+      "last_updated": "2025-06-27T18:06:52.841495+00:00",
+      "conversion_status": "failed"
+    },
+    {
+      "id": "AppImageCommunity-AppImageUpdate-appimageupdate-i686",
+      "name": "AppImageUpdate",
+      "description": "Update applications distributed in AppImage format",
+      "version": "continuous",
+      "category": [
+        "Utility"
+      ],
+      "appimage": {
+        "url": "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/AppImageUpdate-i686.AppImage",
+        "size": "47.5 MB",
+        "checksum": "sha256:1b0021987db5e2a6d2ae4d1d408eaa9caf648a3cba90ea09825bf667b43d2363"
+      },
+      "converted_packages": {
+        "deb": {
+          "status": "tool_unavailable"
+        },
+        "rpm": {
+          "status": "pending"
+        }
+      },
+      "metadata": {
+        "icon": "/tmp/tmpptui0fji/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Update applications distributed in AppImage format', 'executable': 'AppImageUpdate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmpptui0fji/extracted/squashfs-root/appimage.png'}",
+        "executable": "AppImageUpdate",
+        "mime_types": []
+      },
+      "source": {
+        "repository": "https://github.com/AppImageCommunity/AppImageUpdate",
+        "release_tag": "continuous",
+        "release_date": "2025-05-16T23:45:53+00:00"
+      },
+      "last_updated": "2025-06-27T18:07:00.978362+00:00",
+      "conversion_status": "failed"
+    },
+    {
+      "id": "AppImageCommunity-AppImageUpdate-appimageupdate-x86_64",
+      "name": "AppImageUpdate",
+      "description": "Update applications distributed in AppImage format",
+      "version": "continuous",
+      "category": [
+        "Utility"
+      ],
+      "appimage": {
+        "url": "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/AppImageUpdate-x86_64.AppImage",
+        "size": "46.4 MB",
+        "checksum": "sha256:c7356693e423991731ebde88bb8a450aed31641425d713c69d62a8c9a3cc8902"
+      },
+      "converted_packages": {
+        "deb": {
+          "status": "tool_unavailable"
+        },
+        "rpm": {
+          "status": "pending"
+        }
+      },
+      "metadata": {
+        "icon": "/tmp/tmph_fwd12a/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Update applications distributed in AppImage format', 'executable': 'AppImageUpdate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmph_fwd12a/extracted/squashfs-root/appimage.png'}",
+        "executable": "AppImageUpdate",
+        "mime_types": []
+      },
+      "source": {
+        "repository": "https://github.com/AppImageCommunity/AppImageUpdate",
+        "release_tag": "continuous",
+        "release_date": "2025-05-16T23:45:53+00:00"
+      },
+      "last_updated": "2025-06-27T18:07:03.049144+00:00",
+      "conversion_status": "failed"
+    },
+    {
+      "id": "AppImageCommunity-AppImageUpdate-appimageupdatetool-i686",
+      "name": "appimageupdatetool",
+      "description": "",
+      "version": "continuous",
+      "category": [
+        "Utility"
+      ],
+      "appimage": {
+        "url": "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/appimageupdatetool-i686.AppImage",
+        "size": "35.0 MB",
+        "checksum": "sha256:1d5c717dd4275853bb3e0ea47cbf10a4128546cd9ec26e9076edf9a07811db32"
+      },
+      "converted_packages": {
+        "deb": {
+          "status": "tool_unavailable"
+        },
+        "rpm": {
+          "status": "pending"
+        }
+      },
+      "metadata": {
+        "icon": "/tmp/tmphyr2ut8h/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'appimageupdatetool', 'description': '', 'executable': 'appimageupdatetool', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmphyr2ut8h/extracted/squashfs-root/appimage.png'}",
+        "executable": "appimageupdatetool",
+        "mime_types": []
+      },
+      "source": {
+        "repository": "https://github.com/AppImageCommunity/AppImageUpdate",
+        "release_tag": "continuous",
+        "release_date": "2025-05-16T23:45:53+00:00"
+      },
+      "last_updated": "2025-06-27T18:07:08.157619+00:00",
+      "conversion_status": "failed"
+    },
+    {
+      "id": "AppImageCommunity-AppImageUpdate-appimageupdatetool-x86_64",
+      "name": "appimageupdatetool",
+      "description": "",
+      "version": "continuous",
+      "category": [
+        "Utility"
+      ],
+      "appimage": {
+        "url": "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/appimageupdatetool-x86_64.AppImage",
+        "size": "34.8 MB",
+        "checksum": "sha256:d1705aa9348350c4ebd2dae11d632adabf53c6e37a563192cc1de20a6e54c44e"
+      },
+      "converted_packages": {
+        "deb": {
+          "status": "tool_unavailable"
+        },
+        "rpm": {
+          "status": "pending"
+        }
+      },
+      "metadata": {
+        "icon": "/tmp/tmpv8gi66m2/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'appimageupdatetool', 'description': '', 'executable': 'appimageupdatetool', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmpv8gi66m2/extracted/squashfs-root/appimage.png'}",
+        "executable": "appimageupdatetool",
+        "mime_types": []
+      },
+      "source": {
+        "repository": "https://github.com/AppImageCommunity/AppImageUpdate",
+        "release_tag": "continuous",
+        "release_date": "2025-05-16T23:45:53+00:00"
+      },
+      "last_updated": "2025-06-27T18:07:09.401635+00:00",
+      "conversion_status": "failed"
+    },
+    {
+      "id": "AppImageCommunity-AppImageUpdate-validate-i686",
+      "name": "AppImageUpdate",
+      "description": "Validate the built-in signature of AppImages",
+      "version": "continuous",
+      "category": [
+        "Utility"
+      ],
+      "appimage": {
+        "url": "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/validate-i686.AppImage",
+        "size": "33.0 MB",
+        "checksum": "sha256:c96bf2e4b2781d28557d207e892ab3774b31edd99a40573d09a2ea460c10441d"
+      },
+      "converted_packages": {
+        "deb": {
+          "status": "tool_unavailable"
+        },
+        "rpm": {
+          "status": "pending"
+        }
+      },
+      "metadata": {
+        "icon": "/tmp/tmptru_k9tm/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Validate the built-in signature of AppImages', 'executable': 'validate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmptru_k9tm/extracted/squashfs-root/appimage.png'}",
+        "executable": "validate",
+        "mime_types": []
+      },
+      "source": {
+        "repository": "https://github.com/AppImageCommunity/AppImageUpdate",
+        "release_tag": "continuous",
+        "release_date": "2025-05-16T23:45:53+00:00"
+      },
+      "last_updated": "2025-06-27T18:07:14.681559+00:00",
+      "conversion_status": "failed"
+    },
+    {
+      "id": "AppImageCommunity-AppImageUpdate-validate-x86_64",
+      "name": "AppImageUpdate",
+      "description": "Validate the built-in signature of AppImages",
+      "version": "continuous",
+      "category": [
+        "Utility"
+      ],
+      "appimage": {
+        "url": "https://github.com/AppImageCommunity/AppImageUpdate/releases/download/continuous/validate-x86_64.AppImage",
+        "size": "32.8 MB",
+        "checksum": "sha256:85ac2de2ba0ddd6f6e3656da5156c7db11fa62028e6d72e1b1d5cd317fd2cefe"
+      },
+      "converted_packages": {
+        "deb": {
+          "status": "tool_unavailable"
+        },
+        "rpm": {
+          "status": "pending"
+        }
+      },
+      "metadata": {
+        "icon": "/tmp/tmp11pamp0v/extracted/squashfs-root/appimage.png",
+        "desktop_file": "{'name': 'AppImageUpdate', 'description': 'Validate the built-in signature of AppImages', 'executable': 'validate', 'icon': 'appimage', 'categories': ['Utility'], 'mime_types': [], 'icon_path': '/tmp/tmp11pamp0v/extracted/squashfs-root/appimage.png'}",
+        "executable": "validate",
+        "mime_types": []
+      },
+      "source": {
+        "repository": "https://github.com/AppImageCommunity/AppImageUpdate",
+        "release_tag": "continuous",
+        "release_date": "2025-05-16T23:45:53+00:00"
+      },
+      "last_updated": "2025-06-27T18:07:17.817155+00:00",
+      "conversion_status": "failed"
+    }
+  ]
 }
