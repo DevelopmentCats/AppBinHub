@@ -1,0 +1,74 @@
+{
+  "categories": [
+    {
+      "id": "audio",
+      "name": "Audio",
+      "description": "Audio players, editors, and multimedia applications",
+      "count": 0,
+      "icon": "volume-up"
+    },
+    {
+      "id": "education",
+      "name": "Education",
+      "description": "Educational software and learning tools",
+      "count": 0,
+      "icon": "graduation-cap"
+    },
+    {
+      "id": "games",
+      "name": "Games",
+      "description": "Gaming applications and entertainment",
+      "count": 0,
+      "icon": "gamepad"
+    },
+    {
+      "id": "graphics",
+      "name": "Graphics",
+      "description": "Image editors, viewers, and graphics tools",
+      "count": 0,
+      "icon": "image"
+    },
+    {
+      "id": "internet",
+      "name": "Internet",
+      "description": "Web browsers, email clients, and network tools",
+      "count": 0,
+      "icon": "globe"
+    },
+    {
+      "id": "office",
+      "name": "Office",
+      "description": "Office suites, text editors, and productivity tools",
+      "count": 0,
+      "icon": "file-text"
+    },
+    {
+      "id": "programming",
+      "name": "Programming",
+      "description": "Development tools, IDEs, and coding utilities",
+      "count": 0,
+      "icon": "code"
+    },
+    {
+      "id": "utilities",
+      "name": "Utilities",
+      "description": "System tools and utility applications",
+      "count": 0,
+      "icon": "tool"
+    },
+    {
+      "id": "video",
+      "name": "Video",
+      "description": "Video players, editors, and multimedia tools",
+      "count": 0,
+      "icon": "video"
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "description": "Miscellaneous applications",
+      "count": 0,
+      "icon": "package"
+    }
+  ]
+}
