@@ -118,11 +118,7 @@ class AppBinHub {
 
     async loadJSON(url) {
         try {
-            // Add cache busting parameter
-            const cacheBuster = Date.now();
-            const urlWithCacheBuster = `${url}?cb=${cacheBuster}`;
-            
-            const response = await fetch(urlWithCacheBuster, {
+            const response = await fetch(url, {
                 cache: 'no-cache',
                 headers: {
                     'Cache-Control': 'no-cache',
@@ -413,8 +409,8 @@ class AppBinHub {
         
         setInterval(async () => {
             try {
-                // Check if metadata has changed
-                const metadataResponse = await fetch('./data/applications.json?cb=' + Date.now(), {
+                // Check if metadata has changed using the last_updated timestamp
+                const metadataResponse = await fetch('./data/applications.json', {
                     cache: 'no-cache'
                 });
                 
@@ -441,7 +437,7 @@ class AppBinHub {
                 // Wait a bit then check for updates
                 setTimeout(async () => {
                     try {
-                        const metadataResponse = await fetch('./data/applications.json?cb=' + Date.now(), {
+                        const metadataResponse = await fetch('./data/applications.json', {
                             cache: 'no-cache'
                         });
                         

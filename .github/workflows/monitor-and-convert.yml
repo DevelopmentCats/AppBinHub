@@ -103,35 +103,6 @@ jobs:
           echo "changed=false" >> $GITHUB_OUTPUT
         fi
     
-    - name: Add cache busting to JSON files
-      if: steps.verify-changed-files.outputs.changed == 'true'
-      run: |
-        # Add a timestamp to help with cache busting
-        cd website/data
-        for file in *.json; do
-          if [ -f "$file" ]; then
-            # Add a cache_buster field with current timestamp
-            python3 -c "
-import json, sys, time
-filename = '$file'
-try:
-    with open(filename, 'r') as f:
-        data = json.load(f)
-    
-    if 'metadata' in data:
-        data['metadata']['cache_buster'] = int(time.time())
-    else:
-        data['cache_buster'] = int(time.time())
-    
-    with open(filename, 'w') as f:
-        json.dump(data, f, indent=2)
-    print(f'Added cache buster to {filename}')
-except Exception as e:
-    print(f'Could not add cache buster to {filename}: {e}')
-"
-          fi
-        done
-    
     - name: Commit and push changes
       if: steps.verify-changed-files.outputs.changed == 'true'
       run: |
