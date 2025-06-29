@@ -242,3 +242,13 @@
 2025-06-29 16:05:52,206 - INFO - Downloaded AppImage: /tmp/tmpzakwtx_u/Cursor-1.1.6-x86_64.AppImage
 2025-06-29 16:05:52,243 - ERROR - Failed to convert: direct-api-cursor-ai-editor
 2025-06-29 16:05:52,243 - INFO - Conversion complete. Success: 0, Failed: 1
+2025-06-29 20:06:58,544 - WARNING - appimage2deb tool not found
+2025-06-29 20:06:58,569 - INFO - alien tool is available for RPM conversion
+2025-06-29 20:06:58,572 - INFO - dpkg-deb tool is available for package validation
+2025-06-29 20:06:58,572 - INFO - Starting package conversion process
+2025-06-29 20:06:58,573 - INFO - Found 1 applications to convert
+2025-06-29 20:06:58,573 - INFO - Converting application: direct-api-cursor-ai-editor
+2025-06-29 20:06:58,573 - INFO - Downloading AppImage from: https://downloads.cursor.com/production/5b19bac7a947f54e4caa3eb7e4c5fbf832389853/linux/x64/Cursor-1.1.6-x86_64.AppImage
+2025-06-29 20:07:00,984 - INFO - Downloaded AppImage: /tmp/tmphwxhnoat/Cursor-1.1.6-x86_64.AppImage
+2025-06-29 20:07:01,021 - ERROR - Failed to convert: direct-api-cursor-ai-editor
+2025-06-29 20:07:01,021 - INFO - Conversion complete. Success: 0, Failed: 1
