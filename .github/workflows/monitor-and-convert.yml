@@ -101,31 +101,11 @@ jobs:
         
         # Check if we have pending applications
         if [ -f ../website/data/applications.json ]; then
-          pending_count=$(python3 -c "
-          import json
-          with open('../website/data/applications.json', 'r') as f:
-              data = json.load(f)
-          pending = [app for app in data.get('applications', []) if app.get('conversion_status') == 'pending']
-          print(len(pending))
-          ")
+          pending_count=$(python3 -c 'import json; data=json.load(open("../website/data/applications.json")); print(len([app for app in data.get("applications", []) if app.get("conversion_status") == "pending"]))')
           echo "pending_apps=$pending_count" >> $GITHUB_OUTPUT
           
-          # Check last update time
-          last_update=$(python3 -c "
-          import json
-          from datetime import datetime, timezone
-          with open('../website/data/applications.json', 'r') as f:
-              data = json.load(f)
-          last_updated = data.get('metadata', {}).get('last_updated', '')
-          if last_updated:
-              from dateutil import parser
-              last_dt = parser.parse(last_updated)
-              now = datetime.now(timezone.utc)
-              hours_diff = (now - last_dt).total_seconds() / 3600
-              print(int(hours_diff))
-          else:
-              print(999)
-          " 2>/dev/null || echo "999")
+          # Check last update time (hours since last update)
+          last_update=$(python3 -c 'import json; from datetime import datetime, timezone; from dateutil import parser; data=json.load(open("../website/data/applications.json")); last_updated=data.get("metadata", {}).get("last_updated", ""); print(int((datetime.now(timezone.utc) - parser.parse(last_updated)).total_seconds() / 3600) if last_updated else 999)' 2>/dev/null || echo "999")
           echo "hours_since_update=$last_update" >> $GITHUB_OUTPUT
         else
           echo "pending_apps=0" >> $GITHUB_OUTPUT
@@ -205,28 +185,11 @@ jobs:
         summary="AppBinHub Update - $(date -u '+%Y-%m-%d')"
         
         if [ -f ../website/data/applications.json ]; then
-          total_apps=$(python3 -c "
-          import json
-          with open('../website/data/applications.json', 'r') as f:
-              data = json.load(f)
-          print(len(data.get('applications', [])))
-          ")
+          total_apps=$(python3 -c 'import json; data=json.load(open("../website/data/applications.json")); print(len(data.get("applications", [])))')
           
-          pending_apps=$(python3 -c "
-          import json
-          with open('../website/data/applications.json', 'r') as f:
-              data = json.load(f)
-          pending = [app for app in data.get('applications', []) if app.get('conversion_status') == 'pending']
-          print(len(pending))
-          ")
+          pending_apps=$(python3 -c 'import json; data=json.load(open("../website/data/applications.json")); print(len([app for app in data.get("applications", []) if app.get("conversion_status") == "pending"]))')
           
-          completed_apps=$(python3 -c "
-          import json
-          with open('../website/data/applications.json', 'r') as f:
-              data = json.load(f)
-          completed = [app for app in data.get('applications', []) if app.get('conversion_status') == 'completed']
-          print(len(completed))
-          ")
+          completed_apps=$(python3 -c 'import json; data=json.load(open("../website/data/applications.json")); print(len([app for app in data.get("applications", []) if app.get("conversion_status") == "completed"]))')
           
           summary="$summary - Apps: $total_apps (✅ $completed_apps converted, 🔄 $pending_apps pending)"
         fi
