@@ -46,8 +46,17 @@ class ModernAppImageConverter:
     def __init__(self):
         self.data_dir = WEBSITE_DATA_DIR
         self.applications_file = self.data_dir / 'applications.json'
-        self.converted_dir = Path('converted_packages')
+        self.converted_dir = Path('converted_packages')  # Temporary storage
         self.converted_dir.mkdir(exist_ok=True)
+        # Get absolute path for website packages directory
+        self.website_packages_dir = self.data_dir.parent / 'packages'  # Web-accessible storage
+        self.website_packages_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Log paths for debugging
+        logger.info(f"Converter initialized:")
+        logger.info(f"  - Data dir: {self.data_dir}")
+        logger.info(f"  - Temp packages dir: {self.converted_dir.absolute()}")
+        logger.info(f"  - Web packages dir: {self.website_packages_dir.absolute()}")
         
         # Load application data
         self.load_application_data()
@@ -376,25 +385,33 @@ class ModernAppImageConverter:
             version = app_data.get('version', '1.0.0')
             architecture = app_data.get('architecture', 'x86_64')
             
-            # Create versioned directory structure: converted_packages/{app_id}/{version}/
-            version_dir = generate_version_path(app_id, version)
-            version_dir.mkdir(parents=True, exist_ok=True)
+            # Create versioned directory structure in temporary storage: converted_packages/{app_id}/{version}/
+            temp_version_dir = self.converted_dir / app_id / version
+            temp_version_dir.mkdir(parents=True, exist_ok=True)
             
-            # Copy package to versioned storage location
-            stored_path = version_dir / package_path.name
-            shutil.copy2(package_path, stored_path)
+            # Copy package to temporary storage location first
+            temp_stored_path = temp_version_dir / package_path.name
+            shutil.copy2(package_path, temp_stored_path)
             
-            # Generate metadata
+            # Create versioned directory structure in web-accessible storage: website/packages/{app_id}/{version}/
+            web_version_dir = self.website_packages_dir / app_id / version
+            web_version_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Copy package to web-accessible storage location
+            web_stored_path = web_version_dir / package_path.name
+            shutil.copy2(temp_stored_path, web_stored_path)
+            
+            # Generate metadata with web-accessible URL
             metadata = {
-                "url": f"./converted_packages/{app_id}/{version}/{package_path.name}",
-                "size": self.format_file_size(stored_path),
-                "checksum": f"sha256:{self.calculate_file_checksum(stored_path)}",
+                "url": f"./packages/{app_id}/{version}/{package_path.name}",
+                "size": self.format_file_size(web_stored_path),
+                "checksum": f"sha256:{self.calculate_file_checksum(web_stored_path)}",
                 "architecture": architecture,
                 "status": "available",
                 "created": datetime.now(timezone.utc).isoformat()
             }
             
-            logger.info(f"Stored {package_type} package for {app_id} v{version} ({architecture}): {stored_path}")
+            logger.info(f"Stored {package_type} package for {app_id} v{version} ({architecture}): {web_stored_path}")
             return metadata
             
         except Exception as e:

@@ -337,17 +337,30 @@ jobs:
         
         echo "converted_count=$converted_count" >> $GITHUB_OUTPUT
         
-        # Check if we have any meaningful changes
-        if [ -n "$(git status --porcelain)" ]; then
+        # Check if we have any meaningful changes in website directory
+        if [ -n "$(git status --porcelain website/)" ]; then
           echo "changes_made=true" >> $GITHUB_OUTPUT
         else
           echo "changes_made=false" >> $GITHUB_OUTPUT
         fi
     
+    - name: Clean up temporary files
+      if: steps.parse_apps.outputs.proceed == 'true'
+      run: |
+        cd scripts
+        # Remove temporary script files (don't commit these)
+        rm -f apps_to_convert.txt filter_apps.py input_apps.json run_conversion.py
+        rm -f *.log  # Remove log files from scripts directory
+    
     - name: Commit conversion results
       if: steps.check_results.outputs.changes_made == 'true'
       run: |
-        git add .
+        # Only add website-related changes, not script files
+        git add website/
+        
+        # Pull latest changes to avoid conflicts
+        git pull --rebase origin main
+        
         git commit -m "Convert: ${{ steps.check_results.outputs.converted_count }} apps for ${{ matrix.architecture }} - $(date -u '+%Y-%m-%d %H:%M UTC')"
         git push
     
@@ -384,7 +397,7 @@ jobs:
             echo "### 📋 Apps Processed" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             cat scripts/apps_to_convert.txt >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           fi
         else
           echo "- **Status:** ⏸️ No apps for this architecture" >> $GITHUB_STEP_SUMMARY
