@@ -1,0 +1,46 @@
+{
+  "categories": [
+    {
+      "id": "development",
+      "name": "Development",
+      "description": "Code editors, IDEs, and development tools",
+      "count": 0,
+      "icon": "code"
+    },
+    {
+      "id": "graphics",
+      "name": "Graphics",
+      "description": "Image editors, viewers, and graphics tools",
+      "count": 0,
+      "icon": "image"
+    },
+    {
+      "id": "productivity",
+      "name": "Productivity",
+      "description": "Office suites, text editors, and productivity tools",
+      "count": 0,
+      "icon": "file-text"
+    },
+    {
+      "id": "utilities",
+      "name": "Utilities",
+      "description": "System tools and utility applications",
+      "count": 0,
+      "icon": "tool"
+    },
+    {
+      "id": "media",
+      "name": "Media",
+      "description": "Audio and video players, editors, and multimedia tools",
+      "count": 0,
+      "icon": "video"
+    },
+    {
+      "id": "other",
+      "name": "Other",
+      "description": "Miscellaneous applications",
+      "count": 0,
+      "icon": "package"
+    }
+  ]
+}

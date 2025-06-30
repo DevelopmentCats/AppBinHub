@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AppBinHub - A comprehensive web-based application repository system for AppImage packages with automatic conversion to multiple formats">
+    <meta name="keywords" content="AppImage, Linux applications, package conversion, deb, rpm, software repository">
+    <meta name="author" content="AppBinHub">
+    <title>AppBinHub - Universal Linux Application Repository</title>
+    
+    <!-- Favicon -->
+    <link
+rel="icon"
+type="image/x-icon"
+href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>"
+>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'dark-bg': '#121212',
+                        'dark-secondary': '#1e1e1e',
+                        'dark-accent': '#4dabf7',
+                        'dark-text': '#ffffff',
+                        'dark-text-secondary': '#b3b3b3',
+                        'dark-border': '#333333'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-white dark:bg-dark-bg text-gray-900 dark:text-dark-text transition-colors duration-300">
+    <!-- Header -->
+    <header class="bg-white dark:bg-dark-secondary border-b border-gray-200 dark:border-dark-border sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo and Brand -->
+                <div class="flex items-center space-x-3">
+                    <div class="text-2xl">📦</div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-900 dark:text-dark-text">AppBinHub</h1>
+                        <p class="text-xs text-gray-600 dark:text-dark-text-secondary">Universal Linux Repository</p>
+                    </div>
+                </div>
+                
+                <!-- Search Bar -->
+                <div class="flex-1 max-w-2xl mx-8">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="searchInput"
+                            placeholder="Search applications..." 
+                            class="w-full px-4 py-2 pl-10 pr-4 text-gray-900 dark:text-dark-text bg-gray-100 dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-dark-accent"
+                        >
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg
+class="h-5 w-5 text-gray-400 dark:text-dark-text-secondary"
+fill="none"
+stroke="currentColor"
+viewBox="0 0 24 24"
+>
+                                <path
+stroke-linecap="round"
+stroke-linejoin="round"
+stroke-width="2"
+d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Theme Toggle and Stats -->
+                <div class="flex items-center space-x-4">
+                    <div class="hidden sm:block text-sm text-gray-600 dark:text-dark-text-secondary">
+                        <span id="appCount">0</span> apps
+                    </div>
+                    <button 
+                        id="themeToggle"
+                        class="p-2 rounded-lg bg-gray-100 dark:bg-dark-bg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                        aria-label="Toggle theme"
+                    >
+                        <svg
+class="h-5 w-5 hidden dark:block"
+fill="none"
+stroke="currentColor"
+viewBox="0 0 24 24"
+>
+                            <path
+stroke-linecap="round"
+stroke-linejoin="round"
+stroke-width="2"
+d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+></path>
+                        </svg>
+                        <svg
+class="h-5 w-5 block dark:hidden"
+fill="none"
+stroke="currentColor"
+viewBox="0 0 24 24"
+>
+                            <path
+stroke-linecap="round"
+stroke-linejoin="round"
+stroke-width="2"
+d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-gray-50 dark:bg-dark-bg border-b border-gray-200 dark:border-dark-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-8 overflow-x-auto py-3">
+                <button class="category-filter whitespace-nowrap px-3 py-1 rounded-full text-sm font-medium bg-blue-100 dark:bg-dark-accent text-blue-800 dark:text-dark-bg" data-category="all">
+                    All Categories
+                </button>
+                <div id="categoryFilters" class="flex space-x-2">
+                    <!-- Categories will be loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Stats and Filters -->
+        <div class="mb-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-dark-text">Application Catalog</h2>
+                    <p class="text-gray-600 dark:text-dark-text-secondary mt-1">
+                        Discover and download Linux applications in multiple formats
+                    </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <select id="sortSelect" class="px-3 py-2 bg-white dark:bg-dark-secondary border border-gray-300 dark:border-dark-border rounded-lg text-gray-900 dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-dark-accent">
+                        <option value="name">Sort by Name</option>
+                        <option value="date">Sort by Date</option>
+                        <option value="category">Sort by Category</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-12">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 dark:border-dark-accent"></div>
+            <p class="mt-4 text-gray-600 dark:text-dark-text-secondary">Loading applications...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="hidden text-center py-12">
+            <div class="text-6xl mb-4">📦</div>
+            <h3 class="text-xl font-semibold text-gray-900 dark:text-dark-text mb-2">No applications found</h3>
+            <p class="text-gray-600 dark:text-dark-text-secondary">Try adjusting your search or filter criteria</p>
+        </div>
+
+        <!-- Applications Grid -->
+        <div id="applicationsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Applications will be loaded dynamically -->
+        </div>
+
+        <!-- Load More Button -->
+        <div id="loadMoreContainer" class="hidden text-center mt-8">
+            <button id="loadMoreBtn" class="px-6 py-3 bg-blue-600 dark:bg-dark-accent hover:bg-blue-700 dark:hover:bg-blue-600 text-white rounded-lg font-medium transition-colors">
+                Load More Applications
+            </button>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-50 dark:bg-dark-secondary border-t border-gray-200 dark:border-dark-border mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="text-2xl">📦</div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-dark-text">AppBinHub</h3>
+                            <p class="text-sm text-gray-600 dark:text-dark-text-secondary">Universal Linux Repository</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-dark-text-secondary mb-4">
+                        A comprehensive web-based application repository system that monitors AppImage repositories, 
+                        converts packages to multiple formats, and presents them through a modern interface.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a
+href="https://github.com/AppImage"
+target="_blank"
+rel="noopener noreferrer"
+class="text-gray-600 dark:text-dark-text-secondary hover:text-blue-600 dark:hover:text-dark-accent transition-colors"
+>
+                            <svg
+class="h-6 w-6"
+fill="currentColor"
+viewBox="0 0 24 24"
+>
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-900 dark:text-dark-text uppercase tracking-wider mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a
+href="https://appimage.org/"
+target="_blank"
+rel="noopener noreferrer"
+class="text-gray-600 dark:text-dark-text-secondary hover:text-blue-600 dark:hover:text-dark-accent transition-colors"
+>AppImage.org</a></li>
+                        <li><a
+href="https://github.com/AppImage"
+target="_blank"
+rel="noopener noreferrer"
+class="text-gray-600 dark:text-dark-text-secondary hover:text-blue-600 dark:hover:text-dark-accent transition-colors"
+>AppImage GitHub</a></li>
+                        <li><a
+href="https://github.com/AppImageCommunity"
+target="_blank"
+rel="noopener noreferrer"
+class="text-gray-600 dark:text-dark-text-secondary hover:text-blue-600 dark:hover:text-dark-accent transition-colors"
+>Community</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-sm font-semibold text-gray-900 dark:text-dark-text uppercase tracking-wider mb-4">Statistics</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="text-gray-600 dark:text-dark-text-secondary">
+                            <span class="font-medium">Applications:</span> <span id="footerAppCount">0</span>
+                        </li>
+                        <li class="text-gray-600 dark:text-dark-text-secondary">
+                            <span class="font-medium">Categories:</span> <span id="footerCategoryCount">0</span>
+                        </li>
+                        <li class="text-gray-600 dark:text-dark-text-secondary">
+                            <span class="font-medium">Last Updated:</span> <span id="lastUpdated">-</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-200 dark:border-dark-border mt-8 pt-8 text-center">
+                <p class="text-gray-600 dark:text-dark-text-secondary text-sm">
+                    © 2025 AppBinHub. Built with modern web technologies for the Linux community.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="js/theme.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/catalog.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
