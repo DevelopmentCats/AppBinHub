@@ -162,7 +162,7 @@ jobs:
             \"ref\": \"${{ github.ref_name }}\",
             \"inputs\": {
               \"target_architecture\": \"${{ matrix.architecture }}\",
-              \"apps_to_convert\": $(echo "$apps" | jq -c .)
+              \"apps_to_convert\": $(echo "$apps" | jq -c . | jq -R .)
             }
           }"
     
