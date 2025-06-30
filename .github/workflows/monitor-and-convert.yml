@@ -287,10 +287,28 @@ jobs:
         
         echo "converted_count=$converted_count" >> $GITHUB_OUTPUT
         
+        # Go back to root directory for git status check
+        cd ..
+        
+        # Debug: Show what files have changed
+        echo "Git status for website directory:"
+        git status --porcelain website/
+        
+        # Check for any changes in website directory
         if [ -n "$(git status --porcelain website/)" ]; then
           echo "changes_made=true" >> $GITHUB_OUTPUT
+          echo "✅ Changes detected in website directory"
         else
           echo "changes_made=false" >> $GITHUB_OUTPUT
+          echo "❌ No changes detected in website directory"
+          
+          # Additional debugging: check if packages were created
+          echo "Checking for package files:"
+          find website/packages/ -type f 2>/dev/null || echo "No package files found"
+          
+          # Check overall git status
+          echo "Overall git status:"
+          git status --porcelain
         fi
     
     - name: Clean up temporary files
@@ -306,14 +324,6 @@ jobs:
         git pull --rebase origin main
         git commit -m "Convert: ${{ steps.check_results.outputs.converted_count }} apps for ${{ matrix.architecture }} - $(date -u '+%Y-%m-%d %H:%M UTC')"
         git push
-    
-    - name: Upload logs
-      if: always() && steps.filter_apps.outputs.has_apps == 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: conversion-logs-${{ matrix.architecture }}-${{ github.run_number }}
-        path: scripts/*.log
-        retention-days: 7
     
     - name: Create summary
       if: always()
