@@ -22,8 +22,8 @@ on:
 
 # Prevent multiple runs from interfering
 concurrency:
-  group: monitor-workflow
-  cancel-in-progress: true
+  group: monitor-workflow-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   monitor:
@@ -127,6 +127,7 @@ jobs:
       contents: write
     
     strategy:
+      fail-fast: false
       matrix:
         architecture: ['x86_64', 'aarch64', 'armv7l']
     
@@ -229,14 +230,18 @@ jobs:
     
     - name: Convert applications
       if: steps.parse_apps.outputs.proceed == 'true'
-      timeout-minutes: 25
       env:
         APPS_TO_CONVERT: ${{ steps.parse_apps.outputs.apps_to_convert }}
         TARGET_ARCH: ${{ matrix.architecture }}
       run: |
         cd scripts
         
-        echo "Starting conversion with 25-minute timeout..."
+        echo "Starting conversion for ${{ matrix.architecture }}..."
+        echo "GitHub Runner: ${{ runner.os }} ${{ runner.arch }}"
+        echo "Available disk space:"
+        df -h
+        echo "Available memory:"
+        free -h || echo "Memory info not available"
         
         python3 -c "
         import sys
@@ -252,7 +257,11 @@ jobs:
         print(f'Converting {len(apps_to_convert)} apps for {target_arch}')
         print(f'Start time: {time.strftime(\"%Y-%m-%d %H:%M:%S UTC\", time.gmtime())}')
         
-        converter = ModernAppImageConverter()
+        try:
+            converter = ModernAppImageConverter()
+        except Exception as e:
+            print(f'Error initializing converter: {e}')
+            raise
         
         original_apps = converter.data['applications']
         converter.data['applications'] = [
@@ -260,7 +269,9 @@ jobs:
             if app['id'] in apps_to_convert and app.get('conversion_status') == 'pending'
         ]
         
+        print('Starting package conversion process...')
         converter.convert_pending_applications()
+        print('Package conversion completed successfully!')
         
         app_dict = {app['id']: app for app in converter.data['applications']}
         for i, app in enumerate(original_apps):
