@@ -16,6 +16,7 @@ from pathlib import Path
 from github import Github
 from configparser import ConfigParser
 import hashlib
+import platform
 
 # Import configuration
 from config import (
@@ -203,6 +204,23 @@ class AppImageMonitor:
     def extract_appimage_metadata(self, appimage_path):
         """Extract metadata from AppImage file"""
         try:
+            # Check if we can execute this AppImage (architecture compatibility)
+            detected_arch = detect_architecture_from_url(str(appimage_path))
+            current_arch = normalize_architecture(platform.machine())
+            
+            # Skip extraction for cross-architecture AppImages to avoid execution errors
+            if detected_arch != current_arch:
+                logger.info(f"Skipping metadata extraction for cross-architecture AppImage ({detected_arch} on {current_arch})")
+                return {
+                    'name': '',
+                    'description': '',
+                    'executable': '',
+                    'icon': '',
+                    'categories': [],
+                    'mime_types': [],
+                    'cross_architecture_skip': True
+                }
+            
             # Extract AppImage contents
             extract_dir = appimage_path.parent / 'extracted'
             extract_dir.mkdir(exist_ok=True)
@@ -365,6 +383,11 @@ class AppImageMonitor:
         architecture = api_data['architecture']
         app_id = f"{app_config['name'].lower().replace(' ', '-')}"
         
+        # Handle cross-architecture metadata extraction skipping
+        if metadata and metadata.get('cross_architecture_skip', False):
+            logger.info(f"Using fallback metadata for cross-architecture AppImage: {app_config['name']} ({architecture})")
+            metadata = None  # Use fallback values
+        
         # Create architecture-specific record
         record = {
             "id": f"{app_id}-{architecture}",
@@ -395,7 +418,8 @@ class AppImageMonitor:
                 "icon": metadata.get('icon_path', '') if metadata else app_config.get('icon_url', ''),
                 "desktop_file": str(metadata) if metadata else '',
                 "executable": metadata.get('executable', '') if metadata else '',
-                "mime_types": metadata.get('mime_types', []) if metadata else []
+                "mime_types": metadata.get('mime_types', []) if metadata else [],
+                "extraction_skipped": not bool(metadata)  # Flag to indicate if extraction was skipped
             },
             "source": {
                 "website": app_config.get('website', ''),

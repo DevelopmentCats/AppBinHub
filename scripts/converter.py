@@ -76,17 +76,34 @@ class ModernAppImageConverter:
         
         # Check for unsquashfs (primary extraction method)
         try:
-            result = subprocess.run(['unsquashfs', '-version'], 
-                                  capture_output=True, text=True, timeout=10)
-            if result.returncode == 0:
+            # Try different version commands as unsquashfs may respond differently
+            commands_to_try = [
+                ['unsquashfs', '-version'],
+                ['unsquashfs', '--version'],
+                ['unsquashfs', '-help'],
+                ['unsquashfs']  # This will show usage and exit with non-zero but tool exists
+            ]
+            
+            unsquashfs_found = False
+            for cmd in commands_to_try:
+                try:
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=10)
+                    # unsquashfs exists if it runs (even if it exits with error due to no args)
+                    if 'squashfs' in result.stdout.lower() or 'squashfs' in result.stderr.lower() or result.returncode in [0, 1, 2]:
+                        unsquashfs_found = True
+                        logger.info(f"unsquashfs tool is available (detected with: {' '.join(cmd)})")
+                        break
+                except (subprocess.TimeoutExpired, FileNotFoundError):
+                    continue
+            
+            if unsquashfs_found:
                 self.tools_available['unsquashfs'] = True
-                logger.info("unsquashfs tool is available")
             else:
                 self.tools_available['unsquashfs'] = False
                 logger.warning("unsquashfs tool not found")
-        except (subprocess.TimeoutExpired, FileNotFoundError):
+        except Exception as e:
             self.tools_available['unsquashfs'] = False
-            logger.warning("unsquashfs tool not found")
+            logger.warning(f"Error checking unsquashfs: {e}")
         
         # Check for dpkg-deb (for DEB package creation)
         try:
