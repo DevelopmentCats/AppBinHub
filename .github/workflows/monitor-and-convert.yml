@@ -121,6 +121,7 @@ jobs:
     if: needs.monitor.outputs.conversion_needed == 'true'
     needs: monitor
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     
     permissions:
       contents: write
@@ -228,16 +229,20 @@ jobs:
     
     - name: Convert applications
       if: steps.parse_apps.outputs.proceed == 'true'
+      timeout-minutes: 25
       env:
         APPS_TO_CONVERT: ${{ steps.parse_apps.outputs.apps_to_convert }}
         TARGET_ARCH: ${{ matrix.architecture }}
       run: |
         cd scripts
         
+        echo "Starting conversion with 25-minute timeout..."
+        
         python3 -c "
         import sys
         import os
         import json
+        import time
         sys.path.append('.')
         from converter import ModernAppImageConverter
         
@@ -245,6 +250,7 @@ jobs:
         target_arch = os.environ['TARGET_ARCH']
         
         print(f'Converting {len(apps_to_convert)} apps for {target_arch}')
+        print(f'Start time: {time.strftime(\"%Y-%m-%d %H:%M:%S UTC\", time.gmtime())}')
         
         converter = ModernAppImageConverter()
         
@@ -263,6 +269,8 @@ jobs:
         
         converter.data['applications'] = original_apps
         converter.save_application_data()
+        
+        print(f'Conversion completed at: {time.strftime(\"%Y-%m-%d %H:%M:%S UTC\", time.gmtime())}')
         "
       continue-on-error: true
     
