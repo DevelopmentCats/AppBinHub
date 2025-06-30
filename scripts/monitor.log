@@ -210,3 +210,9 @@
 2025-06-30 08:08:00,963 - INFO - Monitoring direct API endpoint: Cursor AI Editor
 2025-06-30 08:08:01,189 - ERROR - Error downloading AppImage: 403 Client Error: Forbidden for url: https://downloads.cursor.com/production/5b19bac7a947f54e4caa3eb7e4c5fbf832389853/linux/x64/Cursor-1.1.6-x86_64.AppImage
 2025-06-30 08:08:01,189 - INFO - No new applications found
+2025-06-30 12:09:10,509 - INFO - Starting AppImage monitoring from all sources
+2025-06-30 12:09:10,510 - INFO - No GitHub repositories to monitor
+2025-06-30 12:09:10,510 - INFO - Monitoring direct API endpoint: Cursor AI Editor
+2025-06-30 12:09:15,410 - ERROR - Error parsing .desktop file: '%' must be followed by '%' or '(', found: '%F'
+2025-06-30 12:09:15,949 - INFO - Added 0 new applications, updated 1 existing
+2025-06-30 12:09:15,950 - INFO - Monitoring complete. Processed 1 applications
