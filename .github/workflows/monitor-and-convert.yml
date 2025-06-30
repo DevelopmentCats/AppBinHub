@@ -213,24 +213,24 @@ jobs:
     - name: Parse and filter applications
       if: steps.filter_apps.outputs.has_apps == 'true'
       id: parse_apps
+      env:
+        INPUT_APPS: ${{ steps.filter_apps.outputs.apps_for_arch }}
+        TARGET_ARCH: ${{ matrix.architecture }}
       run: |
         cd scripts
         
-        # Write the filtered apps JSON to a file to avoid shell escaping issues
-        echo '${{ steps.filter_apps.outputs.apps_for_arch }}' > input_apps.json
-        
-        # Create a conversion script file to avoid shell escaping issues
-        cat > filter_apps.py << 'EOF'
+        # Use inline Python to process apps (no temp files)
+        apps_to_convert=$(python3 -c "
         import json
+        import os
         import sys
         
-        # Parse input apps from file
-        with open('input_apps.json', 'r') as f:
-            input_apps = json.load(f)
-        target_arch = '${{ matrix.architecture }}'
+        # Get data from environment variables
+        input_apps = json.loads(os.environ['INPUT_APPS'])
+        target_arch = os.environ['TARGET_ARCH']
         
-        print(f'Apps to convert for {target_arch}:')
-        print(json.dumps(input_apps, indent=2))
+        print(f'Apps to convert for {target_arch}:', file=sys.stderr)
+        print(json.dumps(input_apps, indent=2), file=sys.stderr)
         
         # Load current applications data
         with open('../website/data/applications.json', 'r') as f:
@@ -244,23 +244,18 @@ jobs:
                     apps_for_conversion.append(app['id'])
                     break
         
-        print(f'Apps to convert: {apps_for_conversion}')
+        print(f'Apps to convert: {apps_for_conversion}', file=sys.stderr)
+        print(f'Found {len(apps_for_conversion)} apps for {target_arch}', file=sys.stderr)
         
-        # Save list for the converter
-        with open('apps_to_convert.txt', 'w') as f:
-            for app_id in apps_for_conversion:
-                f.write(app_id + '\n')
+        # Output as JSON for the next step
+        print(json.dumps(apps_for_conversion))
+        ")
         
-        print(f'Found {len(apps_for_conversion)} apps for {target_arch}')
-        EOF
-        
-        # Run the filtering script
-        python3 filter_apps.py
+        echo "apps_to_convert=$apps_to_convert" >> $GITHUB_OUTPUT
         
         # Check if we have any apps
-        if [ -f apps_to_convert.txt ] && [ -s apps_to_convert.txt ]; then
-          echo "Apps to convert:"
-          cat apps_to_convert.txt
+        if [ "$(echo "$apps_to_convert" | jq '. | length')" -gt 0 ]; then
+          echo "Apps to convert: $apps_to_convert"
           echo "proceed=true" >> $GITHUB_OUTPUT
         else
           echo "No apps found for conversion"
@@ -269,21 +264,24 @@ jobs:
     
     - name: Run architecture-specific conversion
       if: steps.parse_apps.outputs.proceed == 'true'
+      env:
+        APPS_TO_CONVERT: ${{ steps.parse_apps.outputs.apps_to_convert }}
+        TARGET_ARCH: ${{ matrix.architecture }}
       run: |
         cd scripts
         
-        # Create a conversion script file to avoid shell escaping issues
-        cat > run_conversion.py << 'EOF'
+        # Use inline Python for conversion (no temp files)
+        python3 -c "
         import sys
+        import os
+        import json
         sys.path.append('.')
         from converter import ModernAppImageConverter
-        import json
         
-        # Read apps to convert
-        with open('apps_to_convert.txt', 'r') as f:
-            apps_to_convert = [line.strip() for line in f if line.strip()]
+        # Get data from environment variables
+        apps_to_convert = json.loads(os.environ['APPS_TO_CONVERT'])
+        target_arch = os.environ['TARGET_ARCH']
         
-        target_arch = '${{ matrix.architecture }}'
         print(f'Starting conversion for {len(apps_to_convert)} apps on {target_arch}')
         
         # Initialize converter
@@ -296,7 +294,7 @@ jobs:
             if app['id'] in apps_to_convert and app.get('conversion_status') == 'pending'
         ]
         
-        print(f'Filtered to {len(converter.data["applications"])} pending apps')
+        print(f'Filtered to {len(converter.data[\"applications\"])} pending apps')
         
         # Run conversion
         converter.convert_pending_applications()
@@ -309,10 +307,7 @@ jobs:
         
         converter.data['applications'] = original_apps
         converter.save_application_data()
-        EOF
-        
-        # Run the conversion script
-        python3 run_conversion.py
+        "
       continue-on-error: true
     
     - name: Check conversion results
@@ -348,9 +343,8 @@ jobs:
       if: steps.parse_apps.outputs.proceed == 'true'
       run: |
         cd scripts
-        # Remove temporary script files (don't commit these)
-        rm -f apps_to_convert.txt filter_apps.py input_apps.json run_conversion.py
-        rm -f *.log  # Remove log files from scripts directory
+        # Remove any log files from scripts directory (no other temp files created now)
+        rm -f *.log
     
     - name: Commit conversion results
       if: steps.check_results.outputs.changes_made == 'true'
@@ -369,9 +363,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: conversion-logs-${{ matrix.architecture }}-${{ github.run_number }}
-        path: |
-          scripts/*.log
-          scripts/apps_to_convert.txt
+        path: scripts/*.log
         retention-days: 7
     
     - name: Create conversion summary
@@ -392,12 +384,12 @@ jobs:
           echo "- **dpkg-deb:** $(dpkg-deb --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
           echo "- **rpmbuild:** $(rpmbuild --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
           
-          if [ -f scripts/apps_to_convert.txt ]; then
+          if [ "${{ steps.parse_apps.outputs.apps_to_convert }}" != "[]" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "### 📋 Apps Processed" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            echo '${{ steps.parse_apps.outputs.apps_to_convert }}' | jq . >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            cat scripts/apps_to_convert.txt >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
           fi
         else
           echo "- **Status:** ⏸️ No apps for this architecture" >> $GITHUB_STEP_SUMMARY
