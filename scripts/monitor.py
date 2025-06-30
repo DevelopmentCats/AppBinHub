@@ -23,18 +23,25 @@ from config import (
     DIRECT_API_ENDPOINTS,
     WEBSITE_DATA_DIR,
     CATEGORY_MAPPING,
+    LOGGING_CONFIG,
     get_github_token,
     ensure_directories,
     map_desktop_category,
-    is_valid_appimage_url
+    is_valid_appimage_url,
+    normalize_architecture,
+    detect_architecture_from_url,
+    get_available_architectures_for_app,
+    build_api_url_for_architecture,
+    detect_available_architectures_from_api,
+    generate_version_path
 )
 
-# Configure logging
+# Configure logging using config
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=getattr(logging, LOGGING_CONFIG["level"]),
+    format=LOGGING_CONFIG["format"],
     handlers=[
-        logging.FileHandler('monitor.log'),
+        logging.FileHandler(LOGGING_CONFIG["monitor_log"]),
         logging.StreamHandler()
     ]
 )
@@ -106,18 +113,24 @@ class AppImageMonitor:
                 appimage_assets.append(asset)
         return appimage_assets
     
-    def fetch_direct_api_data(self, app_config):
-        """Fetch AppImage data from direct API endpoints"""
+    def fetch_direct_api_data_for_architecture(self, app_config, architecture, arch_config):
+        """Fetch AppImage data from direct API endpoints for a specific architecture"""
         try:
-            response = requests.get(app_config['api_url'], timeout=30)
+            response = requests.get(arch_config['api_url'], timeout=30)
             response.raise_for_status()
             data = response.json()
             
             # Extract download URL
             download_url = data.get('downloadUrl') or data.get('url')
             if not download_url or not is_valid_appimage_url(download_url):
-                logger.error(f"Invalid or missing AppImage URL in API response for {app_config['name']}")
+                logger.error(f"Invalid or missing AppImage URL in API response for {app_config['name']} ({architecture})")
                 return None
+            
+            # Verify architecture matches expected
+            detected_arch = detect_architecture_from_url(download_url)
+            normalized_arch = normalize_architecture(detected_arch)
+            if normalized_arch != architecture:
+                logger.warning(f"Architecture mismatch for {app_config['name']}: expected {architecture}, detected {normalized_arch}")
             
             # Get file size by making a HEAD request
             head_response = requests.head(download_url)
@@ -128,12 +141,44 @@ class AppImageMonitor:
                 'download_url': download_url,
                 'file_size': file_size,
                 'commit_sha': data.get('commitSha'),
-                'app_config': app_config
+                'architecture': architecture,
+                'app_config': app_config,
+                'arch_config': arch_config
             }
             
         except Exception as e:
-            logger.error(f"Error fetching data from {app_config['api_url']}: {e}")
+            logger.error(f"Error fetching data from {arch_config['api_url']} for {architecture}: {e}")
             return None
+    
+    def fetch_direct_api_data(self, app_config):
+        """Fetch AppImage data from direct API endpoints with dynamic architecture detection"""
+        results = []
+        
+        # First, try to dynamically detect available architectures
+        logger.info(f"Detecting available architectures for {app_config['name']}...")
+        available_archs = detect_available_architectures_from_api(app_config)
+        
+        if not available_archs:
+            logger.warning(f"No architectures auto-detected for {app_config['name']}, using fallback")
+            # Fallback to static configuration
+            architectures = get_available_architectures_for_app(app_config)
+            for architecture in architectures:
+                for api_url in build_api_url_for_architecture(app_config, architecture):
+                    arch_config = {'api_url': api_url}
+                    api_data = self.fetch_direct_api_data_for_architecture(app_config, architecture, arch_config)
+                    if api_data:
+                        results.append(api_data)
+                        break  # Found working API URL for this arch
+        else:
+            logger.info(f"Detected {len(available_archs)} available architectures: {[arch for arch, _ in available_archs]}")
+            # Use detected architectures
+            for architecture, api_url in available_archs:
+                arch_config = {'api_url': api_url}
+                api_data = self.fetch_direct_api_data_for_architecture(app_config, architecture, arch_config)
+                if api_data:
+                    results.append(api_data)
+        
+        return results
     
     def download_appimage(self, asset_url, temp_dir):
         """Download AppImage file to temporary directory"""
@@ -194,7 +239,8 @@ class AppImageMonitor:
     def parse_desktop_file(self, desktop_file, squashfs_root):
         """Parse .desktop file and extract metadata"""
         try:
-            config = ConfigParser()
+            # Use RawConfigParser to avoid interpolation issues with field codes like %F
+            config = ConfigParser(interpolation=None)
             config.read(desktop_file, encoding='utf-8')
             
             if 'Desktop Entry' not in config:
@@ -314,26 +360,34 @@ class AppImageMonitor:
         return record
     
     def create_application_record_from_api(self, api_data, metadata, appimage_path):
-        """Create application record from direct API data"""
+        """Create application record from direct API data with multi-architecture support"""
         app_config = api_data['app_config']
-        app_id = f"direct-api-{app_config['name'].lower().replace(' ', '-')}"
+        architecture = api_data['architecture']
+        app_id = f"{app_config['name'].lower().replace(' ', '-')}"
         
+        # Create architecture-specific record
         record = {
-            "id": app_id,
-            "name": app_config['name'],
+            "id": f"{app_id}-{architecture}",
+            "base_id": app_id,  # Base ID for grouping architectures
+            "name": f"{app_config['name']} ({architecture})",
             "description": app_config.get('description', ''),
             "version": api_data['version'],
+            "architecture": architecture,
             "category": [app_config.get('category', 'other')],
             "appimage": {
                 "url": api_data['download_url'],
                 "size": self.format_file_size(api_data['file_size']),
-                "checksum": f"sha256:{self.calculate_file_checksum(appimage_path)}"
+                "checksum": f"sha256:{self.calculate_file_checksum(appimage_path)}",
+                "architecture": architecture
             },
             "converted_packages": {
                 "deb": {
                     "status": "pending"
                 },
                 "rpm": {
+                    "status": "pending"
+                },
+                "tarball": {
                     "status": "pending"
                 }
             },
@@ -345,7 +399,7 @@ class AppImageMonitor:
             },
             "source": {
                 "website": app_config.get('website', ''),
-                "api_url": app_config['api_url'],
+                "api_url": api_data['arch_config']['api_url'],
                 "commit_sha": api_data.get('commit_sha'),
                 "release_date": datetime.now(timezone.utc).isoformat()
             },
@@ -448,26 +502,37 @@ class AppImageMonitor:
         for app_id, app_config in DIRECT_API_ENDPOINTS.items():
             logger.info(f"Monitoring direct API endpoint: {app_config['name']}")
             
-            # Fetch data from API
-            api_data = self.fetch_direct_api_data(app_config)
-            if not api_data:
+            # Fetch data from API for all architectures
+            api_data_list = self.fetch_direct_api_data(app_config)
+            if not api_data_list:
+                logger.warning(f"No API data found for {app_config['name']}")
                 continue
             
-            with tempfile.TemporaryDirectory() as temp_dir:
-                temp_path = Path(temp_dir)
+            # Process each architecture
+            for api_data in api_data_list:
+                architecture = api_data['architecture']
+                logger.info(f"Processing {app_config['name']} for architecture: {architecture}")
                 
-                # Download AppImage
-                appimage_path = self.download_appimage(api_data['download_url'], temp_path)
-                if not appimage_path:
-                    continue
-                
-                # Extract metadata (optional for direct API endpoints)
-                metadata = self.extract_appimage_metadata(appimage_path)
-                # Don't fail if metadata extraction fails for direct API endpoints
-                
-                # Create application record
-                record = self.create_application_record_from_api(api_data, metadata, appimage_path)
-                new_records.append(record)
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    temp_path = Path(temp_dir)
+                    
+                    # Download AppImage
+                    appimage_path = self.download_appimage(api_data['download_url'], temp_path)
+                    if not appimage_path:
+                        logger.error(f"Failed to download AppImage for {app_config['name']} ({architecture})")
+                        continue
+                    
+                    # Extract metadata (optional for direct API endpoints)
+                    metadata = self.extract_appimage_metadata(appimage_path)
+                    # Don't fail if metadata extraction fails for direct API endpoints
+                    if not metadata:
+                        logger.warning(f"Could not extract metadata for {app_config['name']} ({architecture})")
+                    
+                    # Create application record
+                    record = self.create_application_record_from_api(api_data, metadata, appimage_path)
+                    new_records.append(record)
+                    
+                    logger.info(f"Successfully processed {app_config['name']} ({architecture})")
         
         return new_records
     

@@ -2,15 +2,34 @@ name: AppImage Monitor and Convert
 
 on:
   schedule:
-    # Run every 4 hours
-    - cron: '0 */4 * * *'
+    # Run twice per day (morning and evening) instead of every 4 hours
+    - cron: '0 8,20 * * *'
   workflow_dispatch:
-    # Allow manual triggering
+    # Allow manual triggering with options
+    inputs:
+      force_conversion:
+        description: 'Force conversion of all pending apps'
+        required: false
+        default: false
+        type: boolean
+      check_frequency:
+        description: 'Check frequency (daily/weekly)'
+        required: false
+        default: 'daily'
+        type: choice
+        options:
+        - daily
+        - weekly
   push:
     branches: [ main ]
     paths: 
       - 'scripts/**'
       - '.github/workflows/monitor-and-convert.yml'
+
+# Prevent multiple runs from interfering
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
 
 jobs:
   monitor-and-convert:
@@ -31,7 +50,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.11'
         cache: 'pip'
     
     - name: Install Python dependencies
@@ -39,46 +58,79 @@ jobs:
         cd scripts
         pip install -r requirements.txt
     
-    - name: Install system dependencies
+    - name: Install modern system dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y alien dpkg-dev rpm squashfs-tools
         
-        # Install snapd if not already installed
-        sudo apt-get install -y snapd
+        # Install squashfs-tools for AppImage extraction (provides unsquashfs)
+        sudo apt-get install -y squashfs-tools
         
-        # Wait for snapd to be ready
-        sudo systemctl start snapd
-        sudo systemctl enable snapd
-        sleep 10
+        # Install dpkg-dev for creating .deb packages
+        sudo apt-get install -y dpkg-dev
         
-        # Install appimage2deb via Snap with proper permissions
-        sudo snap install appimage2deb --classic 2>/dev/null || \
-        sudo snap install appimage2deb --devmode 2>/dev/null || \
-        sudo snap install appimage2deb 2>/dev/null || \
-        echo "appimage2deb snap installation failed - will try alternative"
+        # Install rpm for creating .rpm packages
+        sudo apt-get install -y rpm
         
-        # If snap failed, try to install from source/alternative
-        if ! command -v appimage2deb &> /dev/null; then
-          echo "Installing appimage2deb alternative method..."
-          # We can add a fallback installation method here
-        fi
+        # Install file utilities
+        sudo apt-get install -y file binutils
         
         # Verify installations
         echo "Checking tool availability:"
-        if command -v appimage2deb &> /dev/null; then
-          echo "✓ appimage2deb: $(appimage2deb --version 2>/dev/null || echo 'available')"
-        else
-          echo "✗ appimage2deb: not available"
-        fi
-        echo "✓ alien: $(alien --version | head -1)"
+        echo "✓ unsquashfs: $(unsquashfs -version 2>&1 | head -1)"
+        echo "✓ mksquashfs: $(mksquashfs -version 2>&1 | head -1)"  
         echo "✓ dpkg-deb: $(dpkg-deb --version | head -1)"
-        echo "✓ squashfs-tools: $(unsquashfs -version 2>&1 | head -1)"
+        if command -v rpmbuild &> /dev/null; then
+          echo "✓ rpmbuild: $(rpmbuild --version | head -1)"
+        else
+          echo "✗ rpmbuild: not available (but rpm is installed for basic functionality)"
+        fi
+        
+        # Ensure unsquashfs is in PATH
+        echo "✓ unsquashfs location: $(which unsquashfs)"
+        echo "✓ unsquashfs permissions: $(ls -la $(which unsquashfs))"
     
     - name: Configure Git
       run: |
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action Bot"
+    
+    - name: Check for existing updates
+      id: check_updates
+      run: |
+        cd scripts
+        
+        # Check if we have pending applications
+        if [ -f ../website/data/applications.json ]; then
+          pending_count=$(python3 -c "
+          import json
+          with open('../website/data/applications.json', 'r') as f:
+              data = json.load(f)
+          pending = [app for app in data.get('applications', []) if app.get('conversion_status') == 'pending']
+          print(len(pending))
+          ")
+          echo "pending_apps=$pending_count" >> $GITHUB_OUTPUT
+          
+          # Check last update time
+          last_update=$(python3 -c "
+          import json
+          from datetime import datetime, timezone
+          with open('../website/data/applications.json', 'r') as f:
+              data = json.load(f)
+          last_updated = data.get('metadata', {}).get('last_updated', '')
+          if last_updated:
+              from dateutil import parser
+              last_dt = parser.parse(last_updated)
+              now = datetime.now(timezone.utc)
+              hours_diff = (now - last_dt).total_seconds() / 3600
+              print(int(hours_diff))
+          else:
+              print(999)
+          " 2>/dev/null || echo "999")
+          echo "hours_since_update=$last_update" >> $GITHUB_OUTPUT
+        else
+          echo "pending_apps=0" >> $GITHUB_OUTPUT
+          echo "hours_since_update=999" >> $GITHUB_OUTPUT
+        fi
     
     - name: Run AppImage monitoring
       env:
@@ -88,31 +140,108 @@ jobs:
         python monitor.py
       continue-on-error: true
     
-    - name: Run package conversion
+    - name: Check if monitoring found new apps
+      id: check_new_apps
       run: |
-        export PATH="/snap/bin:$PATH"
+        if [ -n "$(git status --porcelain website/data/applications.json)" ]; then
+          echo "new_apps_found=true" >> $GITHUB_OUTPUT
+        else
+          echo "new_apps_found=false" >> $GITHUB_OUTPUT
+        fi
+    
+    - name: Run package conversion
+      if: |
+        steps.check_new_apps.outputs.new_apps_found == 'true' || 
+        steps.check_updates.outputs.pending_apps > '0' || 
+        github.event.inputs.force_conversion == 'true' ||
+        steps.check_updates.outputs.hours_since_update > '24'
+      run: |
         cd scripts
         python converter.py
       continue-on-error: true
     
-    - name: Check for changes
-      id: verify-changed-files
+    - name: Check for meaningful changes
+      id: verify-changes
       run: |
+        # Check if we have any meaningful changes (not just timestamp updates)
         if [ -n "$(git status --porcelain)" ]; then
-          echo "changed=true" >> $GITHUB_OUTPUT
+          # Check if changes are only to timestamps in JSON files
+          changed_files=$(git status --porcelain | awk '{print $2}')
+          meaningful_changes=false
+          
+          for file in $changed_files; do
+            if [[ ! "$file" =~ \.json$ ]]; then
+              meaningful_changes=true
+              break
+            fi
+            
+            # Check if JSON changes are more than just timestamp updates
+            if git diff --name-only --cached 2>/dev/null | grep -q "$file" || \
+               git diff "$file" | grep -v '"last_updated"' | grep -v '"metadata"' | grep -q '^[+-]'; then
+              meaningful_changes=true
+              break
+            fi
+          done
+          
+          if [ "$meaningful_changes" = true ]; then
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "Meaningful changes detected"
+          else
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "Only timestamp updates detected, skipping commit"
+          fi
         else
           echo "changed=false" >> $GITHUB_OUTPUT
+          echo "No changes detected"
         fi
     
+    - name: Generate update summary
+      if: steps.verify-changes.outputs.changed == 'true'
+      id: summary
+      run: |
+        cd scripts
+        
+        # Generate a summary of changes
+        summary="AppBinHub Update - $(date -u '+%Y-%m-%d')"
+        
+        if [ -f ../website/data/applications.json ]; then
+          total_apps=$(python3 -c "
+          import json
+          with open('../website/data/applications.json', 'r') as f:
+              data = json.load(f)
+          print(len(data.get('applications', [])))
+          ")
+          
+          pending_apps=$(python3 -c "
+          import json
+          with open('../website/data/applications.json', 'r') as f:
+              data = json.load(f)
+          pending = [app for app in data.get('applications', []) if app.get('conversion_status') == 'pending']
+          print(len(pending))
+          ")
+          
+          completed_apps=$(python3 -c "
+          import json
+          with open('../website/data/applications.json', 'r') as f:
+              data = json.load(f)
+          completed = [app for app in data.get('applications', []) if app.get('conversion_status') == 'completed']
+          print(len(completed))
+          ")
+          
+          summary="$summary - Apps: $total_apps (✅ $completed_apps converted, 🔄 $pending_apps pending)"
+        fi
+        
+        echo "summary=$summary" >> $GITHUB_OUTPUT
+    
     - name: Commit and push changes
-      if: steps.verify-changed-files.outputs.changed == 'true'
+      if: steps.verify-changes.outputs.changed == 'true'
       run: |
         git add .
-        git commit -m "Update application data - $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+        git commit -m "${{ steps.summary.outputs.summary }}"
         git push
     
     - name: Deploy to GitHub Pages
-      if: steps.verify-changed-files.outputs.changed == 'true'
+      if: steps.verify-changes.outputs.changed == 'true'
       uses: peaceiris/actions-gh-pages@v3
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -121,36 +250,62 @@ jobs:
         enable_jekyll: false
         cname: false
     
-    - name: Upload conversion logs
+    - name: Upload logs as artifacts
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: conversion-logs
+        name: appbinhub-logs-${{ github.run_number }}
         path: |
           scripts/*.log
         retention-days: 7
     
-    - name: Create summary
+    - name: Clean up old artifacts
+      if: always()
+      uses: geekyeggo/delete-artifact@v2
+      with:
+        name: |
+          appbinhub-logs-*
+        retain: 5
+        failOnError: false
+    
+    - name: Create detailed summary
       if: always()
       run: |
-        echo "## AppImage Monitor and Convert Summary" >> $GITHUB_STEP_SUMMARY
+        echo "## 📦 AppBinHub Update Summary" >> $GITHUB_STEP_SUMMARY
         echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
-        echo "- **Python Version:** $(python --version)" >> $GITHUB_STEP_SUMMARY
-        echo "- **Tools Status:**" >> $GITHUB_STEP_SUMMARY
-        echo "  - appimage2deb: $(appimage2deb --version 2>/dev/null || echo 'Not available')" >> $GITHUB_STEP_SUMMARY
-        echo "  - alien: $(alien --version 2>/dev/null | head -1 || echo 'Not available')" >> $GITHUB_STEP_SUMMARY
-        echo "  - dpkg-deb: $(dpkg-deb --version 2>/dev/null | head -1 || echo 'Not available')" >> $GITHUB_STEP_SUMMARY
+        echo "- **Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        
+        if [ "${{ steps.verify-changes.outputs.changed }}" == "true" ]; then
+          echo "- **Status:** ✅ Changes detected and deployed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Summary:** ${{ steps.summary.outputs.summary }}" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- **Status:** ⏸️ No meaningful changes detected" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 🔧 Tool Status" >> $GITHUB_STEP_SUMMARY
+        echo "- **unsquashfs:** $(unsquashfs -version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
+        echo "- **dpkg-deb:** $(dpkg-deb --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
+        echo "- **rpmbuild:** $(rpmbuild --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### 📊 Statistics" >> $GITHUB_STEP_SUMMARY
+        echo "- **Pending apps:** ${{ steps.check_updates.outputs.pending_apps }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Hours since last update:** ${{ steps.check_updates.outputs.hours_since_update }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **New apps found:** ${{ steps.check_new_apps.outputs.new_apps_found }}" >> $GITHUB_STEP_SUMMARY
         
         if [ -f scripts/monitor.log ]; then
-          echo "- **Monitor Log (last 10 lines):**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📝 Monitor Log (last 5 lines)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          tail -10 scripts/monitor.log >> $GITHUB_STEP_SUMMARY
+          tail -5 scripts/monitor.log >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
         fi
         
         if [ -f scripts/converter.log ]; then
-          echo "- **Converter Log (last 10 lines):**" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔄 Converter Log (last 5 lines)" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          tail -10 scripts/converter.log >> $GITHUB_STEP_SUMMARY
+          tail -5 scripts/converter.log >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
         fi

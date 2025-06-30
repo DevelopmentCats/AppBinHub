@@ -40,9 +40,9 @@ AppBinHub/
 - **Git** for version control
 
 ### Required System Tools
-- `appimage2deb` (installed via Snap)
-- `alien` (for RPM conversion)
-- `dpkg-dev` (for package validation)
+- `squashfs-tools` (provides unsquashfs for AppImage extraction)
+- `dpkg-dev` (for DEB package creation and validation)
+- `rpm` (for RPM package creation)
 
 ## 🔧 Quick Start
 
@@ -61,9 +61,8 @@ pip install -r requirements.txt
 ### 3. Install System Tools
 ```bash
 # Install conversion tools
-sudo snap install appimage2deb
 sudo apt-get update
-sudo apt-get install alien dpkg-dev
+sudo apt-get install squashfs-tools dpkg-dev rpm
 ```
 
 ### 4. Configure GitHub Token
@@ -99,9 +98,10 @@ python converter.py
 ## 📊 Current Status
 
 - **Total Applications**: 0 (system ready for monitoring)
-- **Supported Categories**: 10 (Games, Programming, Graphics, etc.)
-- **Package Formats**: AppImage, .deb, .rpm
-- **Update Frequency**: Every 4 hours
+- **Configured Sources**: 1 (Cursor AI Editor via direct API)
+- **Supported Categories**: 6 (Development, Graphics, Productivity, Utilities, Media, Other)
+- **Package Formats**: AppImage, .deb, .rpm, .tar.gz
+- **Update Frequency**: Twice daily (8 AM and 8 PM UTC)
 - **Website Theme**: Dark mode optimized
 
 ## 🔧 Configuration
@@ -141,7 +141,7 @@ CONVERSION_TOOLS = {
 ### Backend Automation
 - **Python 3.9+** with requests, PyGithub, BeautifulSoup4
 - **GitHub Actions** for CI/CD automation
-- **appimage2deb** and **alien** for package conversion
+- **unsquashfs** and **dpkg-deb** for package conversion
 
 ### Frontend Website
 - **HTML5/CSS3** with modern dark theme
@@ -166,8 +166,8 @@ Solution: Wait for reset or use authenticated token
 
 **Conversion Tool Missing**
 ```bash
-Error: appimage2deb not found
-Solution: sudo snap install appimage2deb
+Error: unsquashfs tool not found
+Solution: sudo apt-get install squashfs-tools
 ```
 
 **Permission Errors**
@@ -233,4 +233,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Status**: ✅ System Ready | **Last Updated**: June 27, 2025 | **Version**: 1.0.0
+**Status**: ✅ System Ready | **Last Updated**: June 30, 2024 | **Version**: 1.0.0

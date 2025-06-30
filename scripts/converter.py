@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
 AppImage Package Conversion Script for AppBinHub
-Converts AppImage files to multiple package formats (.deb, .rpm)
+Converts AppImage files to multiple package formats (.deb, .rpm, .tar.gz)
+Uses modern extraction methods with unsquashfs and dpkg-deb for reliable conversion
 """
 
 import os
@@ -10,25 +11,40 @@ import subprocess
 import tempfile
 import shutil
 import logging
+import re
+import struct
 from datetime import datetime, timezone
 from pathlib import Path
 import requests
 import hashlib
 
-# Configure logging
+# Import configuration
+from config import (
+    WEBSITE_DATA_DIR,
+    LOGGING_CONFIG,
+    normalize_architecture,
+    detect_architecture_from_url,
+    get_package_formats_for_arch,
+    get_debian_arch,
+    get_rpm_arch,
+    generate_version_path,
+    should_create_package_format
+)
+
+# Configure logging using config
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    level=getattr(logging, LOGGING_CONFIG["level"]),
+    format=LOGGING_CONFIG["format"],
     handlers=[
-        logging.FileHandler('converter.log'),
+        logging.FileHandler(LOGGING_CONFIG["converter_log"]),
         logging.StreamHandler()
     ]
 )
 logger = logging.getLogger(__name__)
 
-class AppImageConverter:
+class ModernAppImageConverter:
     def __init__(self):
-        self.data_dir = Path('../website/data')
+        self.data_dir = WEBSITE_DATA_DIR
         self.applications_file = self.data_dir / 'applications.json'
         self.converted_dir = Path('converted_packages')
         self.converted_dir.mkdir(exist_ok=True)
@@ -58,45 +74,59 @@ class AppImageConverter:
         """Check if required conversion tools are available"""
         self.tools_available = {}
         
-        # Check for appimage2deb (via Snap)
+        # Check for unsquashfs (primary extraction method)
         try:
-            result = subprocess.run(['appimage2deb', '--version'], 
+            result = subprocess.run(['unsquashfs', '-version'], 
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
-                self.tools_available['appimage2deb'] = True
-                logger.info("appimage2deb tool is available")
+                self.tools_available['unsquashfs'] = True
+                logger.info("unsquashfs tool is available")
             else:
-                self.tools_available['appimage2deb'] = False
-                logger.warning("appimage2deb tool not found")
+                self.tools_available['unsquashfs'] = False
+                logger.warning("unsquashfs tool not found")
         except (subprocess.TimeoutExpired, FileNotFoundError):
-            self.tools_available['appimage2deb'] = False
-            logger.warning("appimage2deb tool not found or not responding")
+            self.tools_available['unsquashfs'] = False
+            logger.warning("unsquashfs tool not found")
         
-        # Check for alien (for RPM conversion)
-        try:
-            result = subprocess.run(['alien', '--version'], 
-                                  capture_output=True, text=True, timeout=10)
-            if result.returncode == 0:
-                self.tools_available['alien'] = True
-                logger.info("alien tool is available for RPM conversion")
-            else:
-                self.tools_available['alien'] = False
-                logger.warning("alien tool not found")
-        except (subprocess.TimeoutExpired, FileNotFoundError):
-            self.tools_available['alien'] = False
-            logger.warning("alien tool not found")
-        
-        # Check for dpkg-deb (for package validation)
+        # Check for dpkg-deb (for DEB package creation)
         try:
             result = subprocess.run(['dpkg-deb', '--version'], 
                                   capture_output=True, text=True, timeout=10)
             if result.returncode == 0:
                 self.tools_available['dpkg-deb'] = True
-                logger.info("dpkg-deb tool is available for package validation")
+                logger.info("dpkg-deb tool is available for DEB creation")
             else:
                 self.tools_available['dpkg-deb'] = False
+                logger.warning("dpkg-deb tool not found")
         except (subprocess.TimeoutExpired, FileNotFoundError):
             self.tools_available['dpkg-deb'] = False
+            logger.warning("dpkg-deb tool not found")
+        
+        # Check for rpmbuild (for native RPM creation)
+        try:
+            result = subprocess.run(['rpmbuild', '--version'], 
+                                  capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                self.tools_available['rpmbuild'] = True
+                logger.info("rpmbuild tool is available for RPM creation")
+            else:
+                self.tools_available['rpmbuild'] = False
+                logger.warning("rpmbuild tool not found")
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            self.tools_available['rpmbuild'] = False
+            logger.warning("rpmbuild tool not found")
+        
+        # Check for file utility (for file type detection)
+        try:
+            result = subprocess.run(['file', '--version'], 
+                                  capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                self.tools_available['file'] = True
+                logger.info("file utility is available")
+            else:
+                self.tools_available['file'] = False
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            self.tools_available['file'] = False
     
     def download_appimage(self, url, temp_dir):
         """Download AppImage file to temporary directory"""
@@ -124,78 +154,162 @@ class AppImageConverter:
             logger.error(f"Error downloading AppImage from {url}: {e}")
             return None
     
-    def convert_appimage_to_deb(self, appimage_path, output_dir):
-        """Convert AppImage to Debian package using appimage2deb"""
-        if not self.tools_available.get('appimage2deb', False):
-            logger.error("appimage2deb tool not available")
-            return None
-        
+    def find_squashfs_offset(self, appimage_path):
+        """Find squashfs filesystem offset in AppImage using magic number"""
         try:
-            logger.info(f"Converting {appimage_path} to .deb package")
-            
-            # Run appimage2deb conversion
-            result = subprocess.run([
-                'appimage2deb',
-                str(appimage_path),
-                '--output', str(output_dir)
-            ], capture_output=True, text=True, timeout=300)
-            
-            if result.returncode != 0:
-                logger.error(f"appimage2deb conversion failed: {result.stderr}")
+            with open(appimage_path, 'rb') as f:
+                # Read file in chunks to find squashfs magic number 'hsqs'
+                chunk_size = 1024 * 1024  # 1MB chunks
+                offset = 0
+                
+                while True:
+                    chunk = f.read(chunk_size)
+                    if not chunk:
+                        break
+                    
+                    # Look for squashfs magic number
+                    magic_pos = chunk.find(b'hsqs')
+                    if magic_pos != -1:
+                        return offset + magic_pos
+                    
+                    # Overlap to catch magic number across chunk boundaries
+                    if len(chunk) == chunk_size:
+                        f.seek(-3, 1)
+                        offset += chunk_size - 3
+                    else:
+                        break
+                
                 return None
-            
-            # Find generated .deb file
-            deb_files = list(output_dir.glob('*.deb'))
-            if not deb_files:
-                logger.error("No .deb file generated")
-                return None
-            
-            deb_file = deb_files[0]
-            logger.info(f"Successfully converted to .deb: {deb_file}")
-            return deb_file
-            
-        except subprocess.TimeoutExpired:
-            logger.error("appimage2deb conversion timed out")
-            return None
+                
         except Exception as e:
-            logger.error(f"Error during .deb conversion: {e}")
+            logger.error(f"Error finding squashfs offset: {e}")
             return None
     
-    def convert_deb_to_rpm(self, deb_path, output_dir):
-        """Convert .deb package to .rpm using alien"""
-        if not self.tools_available.get('alien', False):
-            logger.error("alien tool not available for RPM conversion")
-            return None
+    def extract_appimage_with_unsquashfs(self, appimage_path, extract_dir):
+        """Extract AppImage using unsquashfs (primary method)"""
+        if not self.tools_available.get('unsquashfs', False):
+            return False
         
         try:
-            logger.info(f"Converting {deb_path} to .rpm package")
+            logger.info(f"Extracting AppImage with unsquashfs: {appimage_path}")
             
-            # Run alien conversion
-            result = subprocess.run([
-                'alien', '--to-rpm', '--scripts',
-                str(deb_path)
-            ], cwd=output_dir, capture_output=True, text=True, timeout=300)
+            # Find squashfs offset
+            offset = self.find_squashfs_offset(appimage_path)
+            if offset is None:
+                logger.warning("Could not find squashfs offset, trying without offset")
+                
+            # Run unsquashfs
+            cmd = ['unsquashfs', '-f', '-d', str(extract_dir / 'squashfs-root')]
+            if offset is not None:
+                cmd.extend(['-o', str(offset)])
+            cmd.append(str(appimage_path))
             
-            if result.returncode != 0:
-                logger.error(f"alien conversion failed: {result.stderr}")
-                return None
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
             
-            # Find generated .rpm file
-            rpm_files = list(output_dir.glob('*.rpm'))
-            if not rpm_files:
-                logger.error("No .rpm file generated")
-                return None
-            
-            rpm_file = rpm_files[0]
-            logger.info(f"Successfully converted to .rpm: {rpm_file}")
-            return rpm_file
-            
-        except subprocess.TimeoutExpired:
-            logger.error("alien conversion timed out")
-            return None
+            if result.returncode == 0:
+                logger.info("Successfully extracted with unsquashfs")
+                return True
+            else:
+                logger.warning(f"unsquashfs failed: {result.stderr}")
+                return False
+                
         except Exception as e:
-            logger.error(f"Error during .rpm conversion: {e}")
-            return None
+            logger.error(f"Error with unsquashfs extraction: {e}")
+            return False
+    
+    def extract_appimage_builtin(self, appimage_path, extract_dir):
+        """Extract AppImage using built-in --appimage-extract (fallback method)"""
+        try:
+            logger.info(f"Extracting AppImage with built-in method: {appimage_path}")
+            
+            # Make AppImage executable
+            os.chmod(appimage_path, 0o755)
+            
+            # Run AppImage with --appimage-extract
+            result = subprocess.run(
+                [str(appimage_path), '--appimage-extract'],
+                cwd=extract_dir,
+                capture_output=True,
+                text=True,
+                timeout=120
+            )
+            
+            if result.returncode == 0:
+                logger.info("Successfully extracted with built-in method")
+                return True
+            else:
+                logger.warning(f"Built-in extraction failed: {result.stderr}")
+                return False
+                
+        except Exception as e:
+            logger.error(f"Error with built-in extraction: {e}")
+            return False
+    
+    def extract_appimage(self, appimage_path, extract_dir):
+        """Extract AppImage using multiple fallback methods"""
+        # Try unsquashfs first (most reliable)
+        if self.extract_appimage_with_unsquashfs(appimage_path, extract_dir):
+            return True
+        
+        # Fallback to built-in AppImage extraction
+        if self.extract_appimage_builtin(appimage_path, extract_dir):
+            return True
+        
+        logger.error("All extraction methods failed")
+        return False
+    
+    def detect_architecture(self, appimage_path):
+        """Detect architecture from AppImage file using shared config"""
+        try:
+            # Try to get architecture from file command
+            if self.tools_available.get('file', False):
+                result = subprocess.run(['file', str(appimage_path)], 
+                                      capture_output=True, text=True, timeout=10)
+                if result.returncode == 0:
+                    arch_from_file = normalize_architecture(result.stdout)
+                    if arch_from_file != 'x86_64':  # Only trust non-default detections
+                        return arch_from_file
+            
+            # Fallback: try to detect from URL or filename
+            arch_from_url = detect_architecture_from_url(str(appimage_path))
+            if arch_from_url:
+                return arch_from_url
+            
+            # Final fallback
+            logger.warning("Could not detect architecture, defaulting to x86_64")
+            return 'x86_64'
+            
+        except Exception as e:
+            logger.error(f"Error detecting architecture: {e}")
+            return 'x86_64'
+    
+    def generate_package_name(self, app_data, package_type, architecture):
+        """Generate proper package name with version and architecture using shared config"""
+        # Extract base app name from full name (remove architecture suffix if present)
+        app_name = app_data['name'].lower()
+        if f'({architecture})' in app_name:
+            app_name = app_name.replace(f'({architecture})', '').strip()
+        
+        # Clean app name for package naming
+        app_name = re.sub(r'[^a-z0-9\-]', '-', app_name)
+        app_name = re.sub(r'-+', '-', app_name).strip('-')
+        
+        version = app_data.get('version', '1.0.0')
+        # Clean version string
+        version = re.sub(r'[^0-9\.\-]', '', version)
+        if not version:
+            version = '1.0.0'
+        
+        if package_type == 'deb':
+            arch = get_debian_arch(architecture)
+            return f"{app_name}_{version}_{arch}.deb"
+        elif package_type == 'rpm':
+            arch = get_rpm_arch(architecture)
+            return f"{app_name}-{version}-1.{arch}.rpm"
+        elif package_type == 'tar.gz':
+            return f"{app_name}-{version}-{architecture}.tar.gz"
+        
+        return f"{app_name}-{version}-{architecture}.{package_type}"
     
     def validate_deb_package(self, deb_path):
         """Validate .deb package integrity"""
@@ -237,31 +351,189 @@ class AppImageConverter:
             size_bytes /= 1024.0
         return f"{size_bytes:.1f} TB"
     
-    def store_converted_package(self, package_path, app_id, package_type):
-        """Store converted package and return metadata"""
+    def store_converted_package(self, package_path, app_data, package_type):
+        """Store converted package with version management and return metadata"""
         try:
-            # Create app-specific directory
-            app_dir = self.converted_dir / app_id
-            app_dir.mkdir(exist_ok=True)
+            # Extract base app ID and create versioned storage path
+            app_id = app_data.get('base_id', app_data['id'])
+            version = app_data.get('version', '1.0.0')
+            architecture = app_data.get('architecture', 'x86_64')
             
-            # Copy package to storage location
-            stored_path = app_dir / package_path.name
+            # Create versioned directory structure: converted_packages/{app_id}/{version}/
+            version_dir = generate_version_path(app_id, version)
+            version_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Copy package to versioned storage location
+            stored_path = version_dir / package_path.name
             shutil.copy2(package_path, stored_path)
             
             # Generate metadata
             metadata = {
-                "url": f"./converted_packages/{app_id}/{package_path.name}",
+                "url": f"./converted_packages/{app_id}/{version}/{package_path.name}",
                 "size": self.format_file_size(stored_path),
                 "checksum": f"sha256:{self.calculate_file_checksum(stored_path)}",
+                "architecture": architecture,
                 "status": "available",
                 "created": datetime.now(timezone.utc).isoformat()
             }
             
-            logger.info(f"Stored {package_type} package: {stored_path}")
+            logger.info(f"Stored {package_type} package for {app_id} v{version} ({architecture}): {stored_path}")
             return metadata
             
         except Exception as e:
             logger.error(f"Error storing package: {e}")
+            return None
+    
+    def create_deb_package(self, squashfs_root, app_data, architecture, output_dir):
+        """Create DEB package from extracted AppImage contents"""
+        if not self.tools_available.get('dpkg-deb', False):
+            logger.error("dpkg-deb not available for DEB creation")
+            return None
+        
+        try:
+            # Generate package name
+            package_name = self.generate_package_name(app_data, 'deb', architecture)
+            
+            # Create debian package structure
+            deb_dir = output_dir / 'debian_package'
+            deb_dir.mkdir(exist_ok=True)
+            
+            # Create DEBIAN control directory
+            control_dir = deb_dir / 'DEBIAN'
+            control_dir.mkdir(exist_ok=True)
+            
+            # Copy application files to /opt
+            app_name = re.sub(r'[^a-z0-9\-]', '-', app_data['name'].lower())
+            app_install_dir = deb_dir / 'opt' / app_name
+            app_install_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Copy all files from squashfs-root
+            shutil.copytree(squashfs_root, app_install_dir, dirs_exist_ok=True)
+            
+            # Create control file
+            control_content = f"""Package: {app_name}
+Version: {app_data.get('version', '1.0.0')}
+Section: misc
+Priority: optional
+Architecture: {get_debian_arch(architecture)}
+Maintainer: AppBinHub <automated@appbinhub.com>
+Description: {app_data.get('description', app_data['name'])}
+ {app_data.get('description', 'Converted from AppImage')}
+"""
+            
+            with open(control_dir / 'control', 'w') as f:
+                f.write(control_content)
+            
+            # Build DEB package
+            deb_path = output_dir / package_name
+            result = subprocess.run([
+                'dpkg-deb', '--build', str(deb_dir), str(deb_path)
+            ], capture_output=True, text=True, timeout=120)
+            
+            if result.returncode == 0:
+                logger.info(f"Successfully created DEB package: {deb_path}")
+                return deb_path
+            else:
+                logger.error(f"DEB creation failed: {result.stderr}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error creating DEB package: {e}")
+            return None
+    
+    def create_tarball(self, squashfs_root, app_data, architecture, output_dir):
+        """Create tarball from extracted AppImage contents"""
+        try:
+            # Generate package name
+            package_name = self.generate_package_name(app_data, 'tar.gz', architecture)
+            
+            # Create tarball
+            tarball_path = output_dir / package_name
+            
+            # Use tar to create compressed archive
+            result = subprocess.run([
+                'tar', '-czf', str(tarball_path), '-C', str(squashfs_root.parent), squashfs_root.name
+            ], capture_output=True, text=True, timeout=120)
+            
+            if result.returncode == 0:
+                logger.info(f"Successfully created tarball: {tarball_path}")
+                return tarball_path
+            else:
+                logger.error(f"Tarball creation failed: {result.stderr}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error creating tarball: {e}")
+            return None
+    
+    def create_rpm_package(self, squashfs_root, app_data, architecture, output_dir):
+        """Create RPM package from extracted AppImage contents"""
+        if not self.tools_available.get('rpmbuild', False):
+            logger.warning("rpmbuild not available for RPM creation")
+            return None
+        
+        try:
+            # Generate package name  
+            package_name = self.generate_package_name(app_data, 'rpm', architecture)
+            
+            # Create RPM build environment
+            rpm_build_dir = output_dir / 'rpm_build'
+            for subdir in ['BUILD', 'RPMS', 'SOURCES', 'SPECS', 'SRPMS']:
+                (rpm_build_dir / subdir).mkdir(parents=True, exist_ok=True)
+            
+            # Create spec file
+            app_name = re.sub(r'[^a-z0-9\-]', '-', app_data['name'].lower())
+            spec_content = f"""Name: {app_name}
+Version: {app_data.get('version', '1.0.0')}
+Release: 1
+Summary: {app_data.get('description', app_data['name'])}
+License: Unknown
+Group: Applications/System
+BuildArch: {architecture}
+
+%description
+{app_data.get('description', 'Converted from AppImage')}
+
+%install
+mkdir -p %{{buildroot}}/opt/{app_name}
+cp -r {squashfs_root}/* %{{buildroot}}/opt/{app_name}/
+
+%files
+/opt/{app_name}/*
+
+%changelog
+* {datetime.now().strftime('%a %b %d %Y')} AppBinHub <automated@appbinhub.com>
+- Converted from AppImage
+"""
+            
+            spec_file = rpm_build_dir / 'SPECS' / f"{app_name}.spec"
+            with open(spec_file, 'w') as f:
+                f.write(spec_content)
+            
+            # Build RPM
+            result = subprocess.run([
+                'rpmbuild', '--define', f'_topdir {rpm_build_dir}',
+                '-bb', str(spec_file)
+            ], capture_output=True, text=True, timeout=120)
+            
+            if result.returncode == 0:
+                # Find generated RPM
+                rpm_files = list((rpm_build_dir / 'RPMS').rglob('*.rpm'))
+                if rpm_files:
+                    # Move to output directory with correct name
+                    rpm_path = output_dir / package_name
+                    shutil.move(str(rpm_files[0]), str(rpm_path))
+                    logger.info(f"Successfully created RPM package: {rpm_path}")
+                    return rpm_path
+                else:
+                    logger.error("No RPM file found after build")
+                    return None
+            else:
+                logger.error(f"RPM creation failed: {result.stderr}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error creating RPM package: {e}")
             return None
     
     def convert_application(self, app_data):
@@ -279,35 +551,68 @@ class AppImageConverter:
             if not appimage_path:
                 return False
             
+            # Detect architecture
+            architecture = self.detect_architecture(appimage_path)
+            logger.info(f"Detected architecture: {architecture}")
+            
+            # Extract AppImage
+            extract_dir = temp_path / 'extracted'
+            extract_dir.mkdir(exist_ok=True)
+            
+            if not self.extract_appimage(appimage_path, extract_dir):
+                logger.error("Failed to extract AppImage")
+                app_data['conversion_status'] = 'failed'
+                return False
+            
+            # Find squashfs-root directory
+            squashfs_root = extract_dir / 'squashfs-root'
+            if not squashfs_root.exists():
+                logger.error("squashfs-root directory not found")
+                app_data['conversion_status'] = 'failed'
+                return False
+            
             conversion_success = False
             
-            # Convert to .deb
-            if self.tools_available.get('appimage2deb', False):
-                deb_output_dir = temp_path / 'deb_output'
-                deb_output_dir.mkdir(exist_ok=True)
-                
-                deb_path = self.convert_appimage_to_deb(appimage_path, deb_output_dir)
+            # Get preferred package formats for this architecture
+            preferred_formats = get_package_formats_for_arch(architecture)
+            logger.info(f"Creating packages for {architecture}: {preferred_formats}")
+            
+            # Create DEB package (if appropriate for architecture)
+            if should_create_package_format(architecture, 'deb'):
+                deb_path = self.create_deb_package(squashfs_root, app_data, architecture, temp_path)
                 if deb_path and self.validate_deb_package(deb_path):
-                    # Store .deb package
-                    deb_metadata = self.store_converted_package(deb_path, app_id, 'deb')
+                    deb_metadata = self.store_converted_package(deb_path, app_data, 'deb')
                     if deb_metadata:
                         app_data['converted_packages']['deb'] = deb_metadata
                         conversion_success = True
-                    
-                    # Convert .deb to .rpm
-                    if self.tools_available.get('alien', False):
-                        rpm_output_dir = temp_path / 'rpm_output'
-                        rpm_output_dir.mkdir(exist_ok=True)
-                        
-                        rpm_path = self.convert_deb_to_rpm(deb_path, rpm_output_dir)
-                        if rpm_path:
-                            rpm_metadata = self.store_converted_package(rpm_path, app_id, 'rpm')
-                            if rpm_metadata:
-                                app_data['converted_packages']['rpm'] = rpm_metadata
                 else:
                     app_data['converted_packages']['deb']['status'] = 'failed'
             else:
-                app_data['converted_packages']['deb']['status'] = 'tool_unavailable'
+                app_data['converted_packages']['deb']['status'] = 'skipped_architecture'
+            
+            # Create RPM package (if appropriate for architecture)
+            if should_create_package_format(architecture, 'rpm'):
+                rpm_path = self.create_rpm_package(squashfs_root, app_data, architecture, temp_path)
+                if rpm_path:
+                    rpm_metadata = self.store_converted_package(rpm_path, app_data, 'rpm')
+                    if rpm_metadata:
+                        app_data['converted_packages']['rpm'] = rpm_metadata
+                        conversion_success = True
+                else:
+                    app_data['converted_packages']['rpm']['status'] = 'failed'
+            else:
+                app_data['converted_packages']['rpm']['status'] = 'skipped_architecture'
+            
+            # Always create tarball as universal fallback
+            tarball_path = self.create_tarball(squashfs_root, app_data, architecture, temp_path)
+            if tarball_path:
+                tarball_metadata = self.store_converted_package(tarball_path, app_data, 'tar.gz')
+                if tarball_metadata:
+                    # Add tarball to converted packages
+                    if 'tarball' not in app_data['converted_packages']:
+                        app_data['converted_packages']['tarball'] = {}
+                    app_data['converted_packages']['tarball'] = tarball_metadata
+                    conversion_success = True
             
             # Update conversion status
             if conversion_success:
@@ -382,7 +687,7 @@ class AppImageConverter:
 def main():
     """Main entry point"""
     try:
-        converter = AppImageConverter()
+        converter = ModernAppImageConverter()
         
         # Convert pending applications
         converter.convert_pending_applications()

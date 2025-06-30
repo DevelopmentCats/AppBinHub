@@ -1,0 +1,45 @@
+{
+  "name": "appbinhub",
+  "version": "1.0.0",
+  "description": "A comprehensive web-based application repository system that automatically monitors AppImage repositories, converts packages to multiple formats, and presents them through a modern dark-themed website.",
+  "main": "website/index.html",
+  "scripts": {
+    "start": "python -m http.server 8000 --directory website",
+    "test": "cd scripts && python -m pytest tests/ -v",
+    "monitor": "cd scripts && python monitor.py",
+    "convert": "cd scripts && python converter.py",
+    "verify": "cd scripts && python verify_system.py",
+    "setup": "cd scripts && pip install -r requirements.txt",
+    "lint": "cd scripts && flake8 *.py",
+    "format": "cd scripts && black *.py"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/appbinhub/appbinhub.git"
+  },
+  "keywords": [
+    "appimage",
+    "linux",
+    "package-management",
+    "automation",
+    "repository",
+    "deb",
+    "rpm",
+    "github-actions"
+  ],
+  "author": "AppBinHub Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0",
+    "python": ">=3.9.0"
+  },
+  "devDependencies": {
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0"
+  },
+  "optionalDependencies": {},
+  "homepage": "https://appbinhub.github.io/appbinhub/",
+  "bugs": {
+    "url": "https://github.com/appbinhub/appbinhub/issues"
+  }
+} 
