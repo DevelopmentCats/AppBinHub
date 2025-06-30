@@ -216,3 +216,9 @@
 2025-06-30 12:09:15,410 - ERROR - Error parsing .desktop file: '%' must be followed by '%' or '(', found: '%F'
 2025-06-30 12:09:15,949 - INFO - Added 0 new applications, updated 1 existing
 2025-06-30 12:09:15,950 - INFO - Monitoring complete. Processed 1 applications
+2025-06-30 16:06:31,229 - INFO - Starting AppImage monitoring from all sources
+2025-06-30 16:06:31,230 - INFO - No GitHub repositories to monitor
+2025-06-30 16:06:31,230 - INFO - Monitoring direct API endpoint: Cursor AI Editor
+2025-06-30 16:06:35,991 - ERROR - Error parsing .desktop file: '%' must be followed by '%' or '(', found: '%F'
+2025-06-30 16:06:36,532 - INFO - Added 0 new applications, updated 1 existing
+2025-06-30 16:06:36,532 - INFO - Monitoring complete. Processed 1 applications
