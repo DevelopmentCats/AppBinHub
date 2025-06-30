@@ -1,14 +1,13 @@
-name: AppImage Monitoring
+name: Monitor and Convert
 
 on:
   schedule:
-    # Run twice per day (morning and evening)
+    # Run twice daily at 8 AM and 8 PM UTC
     - cron: '0 8,20 * * *'
   workflow_dispatch:
-    # Allow manual triggering with options
     inputs:
       check_frequency:
-        description: 'Check frequency (daily/weekly)'
+        description: 'Check frequency'
         required: false
         default: 'daily'
         type: choice
@@ -51,7 +50,7 @@ jobs:
         python-version: '3.11'
         cache: 'pip'
     
-    - name: Install Python dependencies
+    - name: Install dependencies
       run: |
         cd scripts
         pip install -r requirements.txt
@@ -61,17 +60,15 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action Bot"
     
-    - name: Check for existing updates
+    - name: Check for pending applications
       id: check_updates
       run: |
         cd scripts
         
-        # Check if we have pending applications
         if [ -f ../website/data/applications.json ]; then
           pending_count=$(python3 -c 'import json; data=json.load(open("../website/data/applications.json")); print(len([app for app in data.get("applications", []) if app.get("conversion_status") == "pending"]))')
           echo "pending_apps=$pending_count" >> $GITHUB_OUTPUT
           
-          # Check last update time (hours since last update)
           last_update=$(python3 -c 'import json; from datetime import datetime, timezone; from dateutil import parser; data=json.load(open("../website/data/applications.json")); last_updated=data.get("metadata", {}).get("last_updated", ""); print(int((datetime.now(timezone.utc) - parser.parse(last_updated)).total_seconds() / 3600) if last_updated else 999)' 2>/dev/null || echo "999")
           echo "hours_since_update=$last_update" >> $GITHUB_OUTPUT
         else
@@ -79,7 +76,7 @@ jobs:
           echo "hours_since_update=999" >> $GITHUB_OUTPUT
         fi
     
-    - name: Run AppImage monitoring
+    - name: Monitor AppImage sources
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
@@ -87,7 +84,7 @@ jobs:
         python monitor.py
       continue-on-error: true
     
-    - name: Check if monitoring found new apps
+    - name: Check for new applications
       id: check_new_apps
       run: |
         if [ -n "$(git status --porcelain website/data/applications.json)" ]; then
@@ -96,23 +93,21 @@ jobs:
           echo "new_apps_found=false" >> $GITHUB_OUTPUT
         fi
     
-    - name: Analyze applications needing conversion
+    - name: Analyze conversion queue
       id: check_apps
       run: |
         cd scripts
         
-        # Get list of pending apps and their architectures
         apps_json=$(python3 list_pending_apps.py)
         echo "apps_to_convert=$apps_json" >> $GITHUB_OUTPUT
         
-        # Check if any conversions are needed
         if echo "$apps_json" | jq -e '. | length > 0' > /dev/null; then
           echo "conversion_needed=true" >> $GITHUB_OUTPUT
         else
           echo "conversion_needed=false" >> $GITHUB_OUTPUT
         fi
     
-    - name: Commit monitoring changes
+    - name: Commit new applications
       run: |
         if [ -n "$(git status --porcelain)" ]; then
           git add .
@@ -141,7 +136,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
     
-    - name: Filter apps for this architecture
+    - name: Filter apps by architecture
       id: filter_apps
       run: |
         apps='${{ needs.monitor.outputs.apps_to_convert }}'
@@ -161,44 +156,24 @@ jobs:
         python-version: '3.11'
         cache: 'pip'
     
-    - name: Install Python dependencies
+    - name: Install dependencies
       if: steps.filter_apps.outputs.has_apps == 'true'
       run: |
         cd scripts
         pip install -r requirements.txt
     
-    - name: Install system dependencies for conversion
+    - name: Install conversion tools
       if: steps.filter_apps.outputs.has_apps == 'true'
       run: |
         sudo apt-get update
+        sudo apt-get install -y dpkg-dev rpm file binutils squashfs-tools
         
-        # Install squashfs-tools for AppImage extraction (provides unsquashfs)
-        sudo apt-get install -y squashfs-tools
-        
-        # Install dpkg-dev for creating .deb packages
-        sudo apt-get install -y dpkg-dev
-        
-        # Install rpm for creating .rpm packages
-        sudo apt-get install -y rpm
-        
-        # Install file utilities
-        sudo apt-get install -y file binutils
-        
-        # Verify installations
-        echo "Checking tool availability:"
-        echo "✓ unsquashfs: $(unsquashfs --help 2>&1 | head -1 || echo 'version check failed but tool may be available')"
+        echo "Conversion tools installed:"
         echo "✓ dpkg-deb: $(dpkg-deb --version | head -1)"
-        if command -v rpmbuild &> /dev/null; then
-          echo "✓ rpmbuild: $(rpmbuild --version | head -1)"
-        else
-          echo "✗ rpmbuild: not available (but rpm is installed for basic functionality)"
-        fi
-        
-        # Ensure unsquashfs is in PATH and executable
-        which unsquashfs
-        ls -la $(which unsquashfs)
+        echo "✓ rpmbuild: $(command -v rpmbuild &> /dev/null && rpmbuild --version | head -1 || echo 'not available')"
+        echo "✓ unsquashfs: $(unsquashfs --help 2>&1 | head -1 || echo 'available as fallback')"
     
-    - name: Set up QEMU for cross-architecture (if needed)
+    - name: Set up QEMU for cross-architecture
       if: steps.filter_apps.outputs.has_apps == 'true' && matrix.architecture != 'x86_64'
       uses: docker/setup-qemu-action@v3
       with:
@@ -210,7 +185,7 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action Bot (${{ matrix.architecture }})"
     
-    - name: Parse and filter applications
+    - name: Parse applications for conversion
       if: steps.filter_apps.outputs.has_apps == 'true'
       id: parse_apps
       env:
@@ -219,24 +194,19 @@ jobs:
       run: |
         cd scripts
         
-        # Use inline Python to process apps (no temp files)
         apps_to_convert=$(python3 -c "
         import json
         import os
         import sys
         
-        # Get data from environment variables
         input_apps = json.loads(os.environ['INPUT_APPS'])
         target_arch = os.environ['TARGET_ARCH']
         
-        print(f'Apps to convert for {target_arch}:', file=sys.stderr)
-        print(json.dumps(input_apps, indent=2), file=sys.stderr)
+        print(f'Processing {len(input_apps)} apps for {target_arch}', file=sys.stderr)
         
-        # Load current applications data
         with open('../website/data/applications.json', 'r') as f:
             data = json.load(f)
         
-        # Filter apps for this architecture and mark them for conversion
         apps_for_conversion = []
         for app in data['applications']:
             for input_app in input_apps:
@@ -244,25 +214,19 @@ jobs:
                     apps_for_conversion.append(app['id'])
                     break
         
-        print(f'Apps to convert: {apps_for_conversion}', file=sys.stderr)
-        print(f'Found {len(apps_for_conversion)} apps for {target_arch}', file=sys.stderr)
-        
-        # Output as JSON for the next step
+        print(f'Found {len(apps_for_conversion)} apps to convert', file=sys.stderr)
         print(json.dumps(apps_for_conversion))
         ")
         
         echo "apps_to_convert=$apps_to_convert" >> $GITHUB_OUTPUT
         
-        # Check if we have any apps
         if [ "$(echo "$apps_to_convert" | jq '. | length')" -gt 0 ]; then
-          echo "Apps to convert: $apps_to_convert"
           echo "proceed=true" >> $GITHUB_OUTPUT
         else
-          echo "No apps found for conversion"
           echo "proceed=false" >> $GITHUB_OUTPUT
         fi
     
-    - name: Run architecture-specific conversion
+    - name: Convert applications
       if: steps.parse_apps.outputs.proceed == 'true'
       env:
         APPS_TO_CONVERT: ${{ steps.parse_apps.outputs.apps_to_convert }}
@@ -270,7 +234,6 @@ jobs:
       run: |
         cd scripts
         
-        # Use inline Python for conversion (no temp files)
         python3 -c "
         import sys
         import os
@@ -278,28 +241,21 @@ jobs:
         sys.path.append('.')
         from converter import ModernAppImageConverter
         
-        # Get data from environment variables
         apps_to_convert = json.loads(os.environ['APPS_TO_CONVERT'])
         target_arch = os.environ['TARGET_ARCH']
         
-        print(f'Starting conversion for {len(apps_to_convert)} apps on {target_arch}')
+        print(f'Converting {len(apps_to_convert)} apps for {target_arch}')
         
-        # Initialize converter
         converter = ModernAppImageConverter()
         
-        # Filter to only convert specified apps
         original_apps = converter.data['applications']
         converter.data['applications'] = [
             app for app in original_apps 
             if app['id'] in apps_to_convert and app.get('conversion_status') == 'pending'
         ]
         
-        print(f'Filtered to {len(converter.data[\"applications\"])} pending apps')
-        
-        # Run conversion
         converter.convert_pending_applications()
         
-        # Merge results back
         app_dict = {app['id']: app for app in converter.data['applications']}
         for i, app in enumerate(original_apps):
             if app['id'] in app_dict:
@@ -316,7 +272,6 @@ jobs:
       run: |
         cd scripts
         
-        # Check how many apps were successfully converted
         converted_count=$(python3 -c "
         import json
         with open('../website/data/applications.json', 'r') as f:
@@ -332,7 +287,6 @@ jobs:
         
         echo "converted_count=$converted_count" >> $GITHUB_OUTPUT
         
-        # Check if we have any meaningful changes in website directory
         if [ -n "$(git status --porcelain website/)" ]; then
           echo "changes_made=true" >> $GITHUB_OUTPUT
         else
@@ -343,22 +297,17 @@ jobs:
       if: steps.parse_apps.outputs.proceed == 'true'
       run: |
         cd scripts
-        # Remove any log files from scripts directory (no other temp files created now)
         rm -f *.log
     
     - name: Commit conversion results
       if: steps.check_results.outputs.changes_made == 'true'
       run: |
-        # Only add website-related changes, not script files
         git add website/
-        
-        # Pull latest changes to avoid conflicts
         git pull --rebase origin main
-        
         git commit -m "Convert: ${{ steps.check_results.outputs.converted_count }} apps for ${{ matrix.architecture }} - $(date -u '+%Y-%m-%d %H:%M UTC')"
         git push
     
-    - name: Upload conversion logs
+    - name: Upload logs
       if: always() && steps.filter_apps.outputs.has_apps == 'true'
       uses: actions/upload-artifact@v4
       with:
@@ -366,32 +315,31 @@ jobs:
         path: scripts/*.log
         retention-days: 7
     
-    - name: Create conversion summary
+    - name: Create summary
       if: always()
       run: |
-        echo "## 🔄 AppBinHub Conversion Summary (${{ matrix.architecture }})" >> $GITHUB_STEP_SUMMARY
-        echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        echo "## 🔄 Conversion Summary (${{ matrix.architecture }})" >> $GITHUB_STEP_SUMMARY
         echo "- **Architecture:** ${{ matrix.architecture }}" >> $GITHUB_STEP_SUMMARY
         echo "- **Apps for this arch:** ${{ steps.filter_apps.outputs.has_apps }}" >> $GITHUB_STEP_SUMMARY
         
         if [ "${{ steps.filter_apps.outputs.has_apps }}" == "true" ]; then
           echo "- **Apps converted:** ${{ steps.check_results.outputs.converted_count || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Changes made:** ${{ steps.check_results.outputs.changes_made || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Changes committed:** ${{ steps.check_results.outputs.changes_made || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
           
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### 🔧 Tool Status" >> $GITHUB_STEP_SUMMARY
-          echo "- **unsquashfs:** $(unsquashfs --help 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
-          echo "- **dpkg-deb:** $(dpkg-deb --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
-          echo "- **rpmbuild:** $(rpmbuild --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
+          echo "### Tools Status" >> $GITHUB_STEP_SUMMARY
+          echo "- **AppImage extraction:** Built-in method (primary)" >> $GITHUB_STEP_SUMMARY
+          echo "- **DEB packages:** $(dpkg-deb --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
+          echo "- **RPM packages:** $(rpmbuild --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
           
           if [ "${{ steps.parse_apps.outputs.apps_to_convert }}" != "[]" ]; then
             echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 📋 Apps Processed" >> $GITHUB_STEP_SUMMARY
+            echo "### Apps Processed" >> $GITHUB_STEP_SUMMARY
             echo '```json' >> $GITHUB_STEP_SUMMARY
             echo '${{ steps.parse_apps.outputs.apps_to_convert }}' | jq . >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
           fi
         else
-          echo "- **Status:** ⏸️ No apps for this architecture" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** No apps for this architecture" >> $GITHUB_STEP_SUMMARY
         fi
 

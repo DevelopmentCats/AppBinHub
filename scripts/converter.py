@@ -109,10 +109,10 @@ class ModernAppImageConverter:
                 self.tools_available['unsquashfs'] = True
             else:
                 self.tools_available['unsquashfs'] = False
-                logger.warning("unsquashfs tool not found")
+                logger.info("unsquashfs tool not found (optional - built-in extraction will be used)")
         except Exception as e:
             self.tools_available['unsquashfs'] = False
-            logger.warning(f"Error checking unsquashfs: {e}")
+            logger.info(f"unsquashfs not available: {e} (optional - built-in extraction will be used)")
         
         # Check for dpkg-deb (for DEB package creation)
         try:
@@ -272,13 +272,14 @@ class ModernAppImageConverter:
             return False
     
     def extract_appimage(self, appimage_path, extract_dir):
-        """Extract AppImage using multiple fallback methods"""
-        # Try unsquashfs first (most reliable)
-        if self.extract_appimage_with_unsquashfs(appimage_path, extract_dir):
+        """Extract AppImage using the reliable built-in method"""
+        # Use built-in AppImage extraction (most reliable for AppImages)
+        if self.extract_appimage_builtin(appimage_path, extract_dir):
             return True
         
-        # Fallback to built-in AppImage extraction
-        if self.extract_appimage_builtin(appimage_path, extract_dir):
+        # Fallback to unsquashfs only if built-in fails
+        logger.warning("Built-in extraction failed, trying unsquashfs as fallback")
+        if self.extract_appimage_with_unsquashfs(appimage_path, extract_dir):
             return True
         
         logger.error("All extraction methods failed")

@@ -116,7 +116,7 @@ CONVERSION_TOOLS = {
         "install_method": "apt",  # via squashfs-tools package
         "timeout": 60,  # 1 minute for extraction
         "enabled": True,
-        "optional": False  # Required for AppImage extraction
+        "optional": True  # AppImages have built-in extraction, unsquashfs is fallback only
     },
     "dpkg-deb": {
         "command": "dpkg-deb",
