@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "last_updated": "2025-12-18T08:05:54.708973+00:00",
+    "last_updated": "2025-12-18T20:04:55.506270+00:00",
     "total_applications": 2,
     "version": "1.0.0"
   },
@@ -33,8 +33,8 @@
         }
       },
       "metadata": {
-        "icon": "/tmp/tmpmj6yh7p_/extracted/squashfs-root/co.anysphere.cursor.png",
-        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmpmj6yh7p_/extracted/squashfs-root/co.anysphere.cursor.png'}",
+        "icon": "/tmp/tmpfsjykob4/extracted/squashfs-root/co.anysphere.cursor.png",
+        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmpfsjykob4/extracted/squashfs-root/co.anysphere.cursor.png'}",
         "executable": "cursor %F",
         "mime_types": [
           "application/x-cursor-workspace"
@@ -45,9 +45,9 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-x64",
         "commit_sha": "55c9bc11e99cedd1fb93fbb7996abf779c58315f",
-        "release_date": "2025-12-18T08:05:45.090070+00:00"
+        "release_date": "2025-12-18T20:04:46.259757+00:00"
       },
-      "last_updated": "2025-12-18T08:05:45.090088+00:00",
+      "last_updated": "2025-12-18T20:04:46.259776+00:00",
       "conversion_status": "pending"
     },
     {
@@ -88,9 +88,9 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-arm64",
         "commit_sha": "55c9bc11e99cedd1fb93fbb7996abf779c58315f",
-        "release_date": "2025-12-18T08:05:54.667248+00:00"
+        "release_date": "2025-12-18T20:04:55.464584+00:00"
       },
-      "last_updated": "2025-12-18T08:05:54.667267+00:00",
+      "last_updated": "2025-12-18T20:04:55.464603+00:00",
       "conversion_status": "pending"
     }
   ]
