@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "last_updated": "2025-12-26T20:05:04.509501+00:00",
+    "last_updated": "2025-12-27T08:05:19.755197+00:00",
     "total_applications": 2,
     "version": "1.0.0"
   },
@@ -10,15 +10,15 @@
       "base_id": "cursor-ai-editor",
       "name": "Cursor AI Editor (x86_64)",
       "description": "AI-powered code editor built for programming with artificial intelligence",
-      "version": "2.2.43",
+      "version": "2.2.44",
       "architecture": "x86_64",
       "category": [
         "development"
       ],
       "appimage": {
-        "url": "https://downloads.cursor.com/production/32cfbe848b35d9eb320980195985450f244b303d/linux/x64/Cursor-2.2.43-x86_64.AppImage",
+        "url": "https://downloads.cursor.com/production/20adc1003928b0f1b99305dbaf845656ff81f5d4/linux/x64/Cursor-2.2.44-x86_64.AppImage",
         "size": "232.7 MB",
-        "checksum": "sha256:5903e92dec533bdfbc65e40f161963fc21c46eba16f1acc15fd563a6bd74f1ad",
+        "checksum": "sha256:862b742fabc4f3dde33eae1042ab5e4fa4f4f218215f9844fcd64b5164eaaaf6",
         "architecture": "x86_64"
       },
       "converted_packages": {
@@ -33,8 +33,8 @@
         }
       },
       "metadata": {
-        "icon": "/tmp/tmpdhkkkjpw/extracted/squashfs-root/co.anysphere.cursor.png",
-        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmpdhkkkjpw/extracted/squashfs-root/co.anysphere.cursor.png'}",
+        "icon": "/tmp/tmpdwwsyieq/extracted/squashfs-root/co.anysphere.cursor.png",
+        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmpdwwsyieq/extracted/squashfs-root/co.anysphere.cursor.png'}",
         "executable": "cursor %F",
         "mime_types": [
           "application/x-cursor-workspace"
@@ -44,10 +44,10 @@
       "source": {
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-x64",
-        "commit_sha": "32cfbe848b35d9eb320980195985450f244b303d",
-        "release_date": "2025-12-26T20:04:55.642630+00:00"
+        "commit_sha": "20adc1003928b0f1b99305dbaf845656ff81f5d4",
+        "release_date": "2025-12-27T08:05:14.392448+00:00"
       },
-      "last_updated": "2025-12-26T20:04:55.642643+00:00",
+      "last_updated": "2025-12-27T08:05:14.392464+00:00",
       "conversion_status": "pending"
     },
     {
@@ -55,15 +55,15 @@
       "base_id": "cursor-ai-editor",
       "name": "Cursor AI Editor (aarch64)",
       "description": "AI-powered code editor built for programming with artificial intelligence",
-      "version": "2.2.43",
+      "version": "2.2.44",
       "architecture": "aarch64",
       "category": [
         "development"
       ],
       "appimage": {
-        "url": "https://downloads.cursor.com/production/32cfbe848b35d9eb320980195985450f244b303d/linux/arm64/Cursor-2.2.43-aarch64.AppImage",
+        "url": "https://downloads.cursor.com/production/20adc1003928b0f1b99305dbaf845656ff81f5d4/linux/arm64/Cursor-2.2.44-aarch64.AppImage",
         "size": "212.2 MB",
-        "checksum": "sha256:f1671b10701cf44217a288492667e3051bec93c5274ee6f87baab4702181c43a",
+        "checksum": "sha256:0f6a5c7f0cd1103fd36060010a8f37608e20efbb6edf182faa33a8f17b2d7920",
         "architecture": "aarch64"
       },
       "converted_packages": {
@@ -87,10 +87,10 @@
       "source": {
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-arm64",
-        "commit_sha": "32cfbe848b35d9eb320980195985450f244b303d",
-        "release_date": "2025-12-26T20:05:04.468251+00:00"
+        "commit_sha": "20adc1003928b0f1b99305dbaf845656ff81f5d4",
+        "release_date": "2025-12-27T08:05:19.730378+00:00"
       },
-      "last_updated": "2025-12-26T20:05:04.468269+00:00",
+      "last_updated": "2025-12-27T08:05:19.730394+00:00",
       "conversion_status": "pending"
     }
   ]
