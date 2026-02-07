@@ -20,10 +20,11 @@ on:
       - 'scripts/**'
       - '.github/workflows/**'
 
-# Prevent multiple runs from interfering
+# Only ONE run at a time across ALL triggers (schedule, push, workflow_dispatch)
+# cancel-in-progress: true means new runs cancel old ones
 concurrency:
-  group: monitor-workflow-${{ github.ref }}
-  cancel-in-progress: false
+  group: appbinhub-monitor-convert
+  cancel-in-progress: true
 
 jobs:
   monitor:
