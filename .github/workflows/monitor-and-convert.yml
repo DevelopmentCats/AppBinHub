@@ -339,10 +339,26 @@ jobs:
     - name: Commit conversion results
       if: steps.check_results.outputs.changes_made == 'true'
       run: |
+        # Commit first, THEN rebase (can't rebase with staged changes)
         git add website/
-        git pull --rebase origin main
         git commit -m "Convert: ${{ steps.check_results.outputs.converted_count }} apps for ${{ matrix.architecture }} - $(date -u '+%Y-%m-%d %H:%M UTC')"
-        git push
+        
+        # Pull with rebase to replay our commit on top of any remote changes
+        # Retry logic for race condition between parallel matrix jobs
+        for i in 1 2 3 4 5; do
+          git pull --rebase origin main && break
+          echo "Rebase attempt $i failed, retrying in 5s..."
+          sleep 5
+          git fetch origin main
+        done
+        
+        # Push with retry for race conditions
+        for i in 1 2 3 4 5; do
+          git push && break
+          echo "Push attempt $i failed, rebasing and retrying..."
+          sleep 5
+          git pull --rebase origin main
+        done
     
     - name: Create summary
       if: always()
