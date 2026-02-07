@@ -128,6 +128,7 @@ jobs:
     
     strategy:
       fail-fast: false
+      max-parallel: 1  # Run sequentially to avoid merge conflicts on applications.json
       matrix:
         architecture: ['x86_64', 'aarch64', 'armv7l']
     
@@ -339,26 +340,14 @@ jobs:
     - name: Commit conversion results
       if: steps.check_results.outputs.changes_made == 'true'
       run: |
-        # Commit first, THEN rebase (can't rebase with staged changes)
+        # Commit our changes
         git add website/
         git commit -m "Convert: ${{ steps.check_results.outputs.converted_count }} apps for ${{ matrix.architecture }} - $(date -u '+%Y-%m-%d %H:%M UTC')"
         
-        # Pull with rebase to replay our commit on top of any remote changes
-        # Retry logic for race condition between parallel matrix jobs
-        for i in 1 2 3 4 5; do
-          git pull --rebase origin main && break
-          echo "Rebase attempt $i failed, retrying in 5s..."
-          sleep 5
-          git fetch origin main
-        done
-        
-        # Push with retry for race conditions
-        for i in 1 2 3 4 5; do
-          git push && break
-          echo "Push attempt $i failed, rebasing and retrying..."
-          sleep 5
-          git pull --rebase origin main
-        done
+        # Pull latest (in case monitor job pushed), then push
+        # With max-parallel: 1, no other convert job is running so this should be clean
+        git pull --rebase origin main
+        git push origin main
     
     - name: Create summary
       if: always()
