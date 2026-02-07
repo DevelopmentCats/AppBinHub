@@ -341,13 +341,21 @@ jobs:
     - name: Commit conversion results
       if: steps.check_results.outputs.changes_made == 'true'
       run: |
-        # Commit our changes
+        # Stash our converted packages and updated JSON
+        git stash push -m "conversion-results" -- website/
+        
+        # Pull latest from origin (monitor job may have pushed)
+        git pull origin main
+        
+        # Pop our stashed changes - they should apply cleanly since:
+        # - Monitor adds new apps to applications.json
+        # - Convert updates existing apps in applications.json
+        # - Package files are new (no conflicts)
+        git stash pop
+        
+        # Commit and push
         git add website/
         git commit -m "Convert: ${{ steps.check_results.outputs.converted_count }} apps for ${{ matrix.architecture }} - $(date -u '+%Y-%m-%d %H:%M UTC')"
-        
-        # Pull latest (in case monitor job pushed), then push
-        # With max-parallel: 1, no other convert job is running so this should be clean
-        git pull --rebase origin main
         git push origin main
     
     - name: Create summary
