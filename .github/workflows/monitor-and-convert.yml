@@ -341,35 +341,34 @@ jobs:
     - name: Commit conversion results
       if: steps.check_results.outputs.changes_made == 'true'
       run: |
-        # First, commit our local changes
-        git add website/
-        git commit -m "Convert: ${{ steps.check_results.outputs.converted_count }} apps for ${{ matrix.architecture }} - $(date -u '+%Y-%m-%d %H:%M UTC')"
+        # Push with retry logic and smart merge
+        MAX_RETRIES=5
+        RETRY=0
         
-        # Fetch latest from origin (monitor job may have pushed)
-        git fetch origin main
+        # Save our converted packages
+        mkdir -p /tmp/converted_packages
+        cp -r website/packages/* /tmp/converted_packages/ 2>/dev/null || true
+        cp website/data/applications.json /tmp/our_apps.json
         
-        # Check if we need to merge
-        LOCAL=$(git rev-parse HEAD)
-        REMOTE=$(git rev-parse origin/main)
-        
-        if [ "$LOCAL" != "$REMOTE" ]; then
-          echo "Remote has new commits, merging applications.json..."
+        until false; do
+          # Fetch latest from origin
+          git fetch origin main
           
-          # Save our version
-          cp website/data/applications.json /tmp/our_apps.json
+          # Reset to remote main (start fresh each retry)
+          git reset --hard origin/main
           
-          # Get remote version
-          git show origin/main:website/data/applications.json > /tmp/remote_apps.json
+          # Restore converted packages
+          cp -r /tmp/converted_packages/* website/packages/ 2>/dev/null || true
           
-          # Merge intelligently with Python
+          # Merge applications.json intelligently
           python3 << 'PYEOF'
         import json
         
-        # Load both versions
+        # Load our converted version and remote version
         with open('/tmp/our_apps.json', 'r') as f:
             our_data = json.load(f)
         
-        with open('/tmp/remote_apps.json', 'r') as f:
+        with open('website/data/applications.json', 'r') as f:
             remote_data = json.load(f)
         
         # Build lookup of our changes by app id
@@ -396,18 +395,20 @@ jobs:
             json.dump(result, f, indent=2)
             f.write('\n')
         
-        print(f"✅ Merged {len(merged_apps)} applications ({len(our_only)} new from our job)")
+        print(f"✅ Merged {len(merged_apps)} applications")
         PYEOF
           
-          # Commit the merge
-          git add website/data/applications.json
-          git commit --amend --no-edit
-        fi
-        
-        # Push with retry logic
-        MAX_RETRIES=5
-        RETRY=0
-        until git push origin main; do
+          # Commit changes
+          git add website/
+          git commit -m "Convert: ${{ steps.check_results.outputs.converted_count }} apps for ${{ matrix.architecture }} - $(date -u '+%Y-%m-%d %H:%M UTC')"
+          
+          # Try to push
+          if git push origin main; then
+            echo "✅ Successfully pushed to main"
+            break
+          fi
+          
+          # Push failed, retry
           RETRY=$((RETRY + 1))
           if [ $RETRY -ge $MAX_RETRIES ]; then
             echo "❌ Failed to push after $MAX_RETRIES attempts"
@@ -415,47 +416,7 @@ jobs:
           fi
           echo "⚠️  Push failed, retrying in 5s (attempt $RETRY/$MAX_RETRIES)..."
           sleep 5
-          
-          # Fetch and try merge again
-          git fetch origin main
-          LOCAL=$(git rev-parse HEAD)
-          REMOTE=$(git rev-parse origin/main)
-          
-          if [ "$LOCAL" != "$REMOTE" ]; then
-            echo "New remote commits detected, re-merging..."
-            cp website/data/applications.json /tmp/our_apps.json
-            git show origin/main:website/data/applications.json > /tmp/remote_apps.json
-            
-            python3 << 'PYEOF2'
-        import json
-        
-        with open('/tmp/our_apps.json', 'r') as f:
-            our_data = json.load(f)
-        
-        with open('/tmp/remote_apps.json', 'r') as f:
-            remote_data = json.load(f)
-        
-        our_apps = {app['id']: app for app in our_data['applications']}
-        merged_apps = []
-        for app in remote_data['applications']:
-            merged_apps.append(our_apps.get(app['id'], app))
-        
-        our_only = set(our_apps.keys()) - set(app['id'] for app in remote_data['applications'])
-        for app_id in our_only:
-            merged_apps.append(our_apps[app_id])
-        
-        result = {'applications': merged_apps}
-        with open('website/data/applications.json', 'w') as f:
-            json.dump(result, f, indent=2)
-            f.write('\n')
-        PYEOF2
-            
-            git add website/data/applications.json
-            git commit --amend --no-edit
-          fi
         done
-        
-        echo "✅ Successfully pushed to main"
     
     - name: Create summary
       if: always()
