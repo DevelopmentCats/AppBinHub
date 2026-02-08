@@ -1,5 +1,7 @@
 name: Monitor and Convert
 
+run-name: "${{ github.event_name == 'schedule' && '⏰ Scheduled run' || github.event_name == 'workflow_dispatch' && '🔧 Manual run' || '📦 Auto-triggered' }}"
+
 on:
   schedule:
     # Run twice daily at 8 AM and 8 PM UTC
