@@ -7,6 +7,11 @@ on:
       - 'Dockerfile'
       - '.github/workflows/build-image.yml'
   workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Debug mode'
+        required: false
+        default: 'false'
 
 jobs:
   build:
