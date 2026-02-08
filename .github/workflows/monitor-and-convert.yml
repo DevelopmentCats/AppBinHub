@@ -142,6 +142,10 @@ jobs:
         fetch-depth: 0
         ref: main
     
+    - name: Configure Git for container
+      run: |
+        git config --global --add safe.directory /__w/AppBinHub/AppBinHub
+    
     - name: Pull latest changes from monitor
       run: |
         git pull origin main
