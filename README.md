@@ -1,236 +1,170 @@
 # AppBinHub
 
-A comprehensive web-based application repository system that automatically monitors AppImage repositories, converts packages to multiple formats, and presents them through a modern dark-themed website.
+> **Live Site:** [https://developmentcats.github.io/AppBinHub/](https://developmentcats.github.io/AppBinHub/)
+
+Automated AppImage conversion hub that monitors sources, converts packages to multiple formats (DEB, RPM, TAR.GZ), and hosts them via GitHub Releases with a clean web catalog.
 
 ## 🚀 Features
 
-- **Automated AppImage Monitoring**: Continuously monitors GitHub repositories for new AppImage releases
-- **Multi-Format Package Conversion**: Converts AppImages to .deb and .rpm packages automatically  
-- **Modern Dark-Themed Website**: Clean, responsive interface optimized for all devices
-- **GitHub Actions Integration**: Fully automated pipeline with scheduled monitoring and deployment
-- **Comprehensive Metadata Extraction**: Extracts application information, icons, and desktop files
-- **Real-Time Updates**: Website automatically updates with new applications every 4 hours
+- **Automated Monitoring**: Watches AppImage sources for new releases (twice daily)
+- **Cross-Platform Conversion**: Creates DEB, RPM, and TAR.GZ packages from AppImages
+- **Cross-Compilation**: Builds ARM packages on x86_64 runners (no QEMU needed)
+- **GitHub Releases Storage**: Packages stored as release assets (no git bloat)
+- **Docker-Based Pipeline**: Fast conversion with pre-built container image
+- **Clean Web Interface**: Browse and download packages from GitHub Pages
 
-## 🏗️ System Architecture
+## 📦 Architecture
 
 ```
-AppBinHub/
-├── website/                 # Static web application (GitHub Pages)
-│   ├── css/                # Dark theme stylesheets
-│   ├── js/                 # Client-side JavaScript
-│   ├── data/               # JSON application database
-│   └── index.html          # Main catalog interface
-├── scripts/                # Python automation system
-│   ├── monitor.py          # AppImage repository monitoring
-│   ├── converter.py        # Package conversion engine
-│   ├── config.py           # System configuration
-│   └── verify_system.py    # System validation
-├── .github/workflows/      # GitHub Actions automation
-│   ├── monitor-and-convert.yml
-│   └── deploy.yml
-└── docs/                   # Comprehensive documentation
+Monitor (Python) → Convert (Docker) → Upload (GitHub Releases) → Website (Static)
+     ↓                  ↓                      ↓                        ↓
+  Cursor API     x86_64 + ARM pkgs    cursor-ai-editor-v2.4.28    JSON catalog
 ```
 
-## 📋 System Requirements
+### Key Components
 
-### Prerequisites
-- **Python 3.9+** for automation scripts
-- **Ubuntu/Debian Linux** for package conversion tools
-- **GitHub account** with Actions enabled
-- **Git** for version control
+- **Monitor Script** (`monitor.py`) - Checks sources for new AppImage releases
+- **Converter** (`converter.py`) - Extracts AppImages and builds packages
+  - Uses `unsquashfs` for extraction (works cross-architecture)
+  - Uses `dpkg-deb` for DEB packages
+  - Uses `rpmbuild` for native x86_64 RPMs
+  - Uses **FPM** for cross-compiled ARM RPMs
+- **Docker Image** (`ghcr.io/developmentcats/appbinhub-converter`) - Pre-built with all tools
+- **GitHub Actions** - Automated pipeline runs twice daily (8 AM/PM UTC)
+- **GitHub Releases** - Package storage (bypasses 100MB git file limit)
 
-### Required System Tools
-- `squashfs-tools` (provides unsquashfs for AppImage extraction)
-- `dpkg-dev` (for DEB package creation and validation)
-- `rpm` (for RPM package creation)
+## 🏃 Quick Start
 
-## 🔧 Quick Start
+### For Users (Download Packages)
 
-### 1. Clone Repository
+Visit **[https://developmentcats.github.io/AppBinHub/](https://developmentcats.github.io/AppBinHub/)** to browse and download converted packages.
+
+### For Developers (Run Locally)
+
 ```bash
-git clone https://github.com/your-username/appbinhub.git
-cd appbinhub
-```
+# Clone
+git clone https://github.com/DevelopmentCats/AppBinHub.git
+cd AppBinHub
 
-### 2. Install Dependencies
-```bash
-cd scripts
-pip install -r requirements.txt
-```
+# Install Python deps
+cd scripts && pip install -r requirements.txt
 
-### 3. Install System Tools
-```bash
-# Install conversion tools
-sudo apt-get update
-sudo apt-get install squashfs-tools dpkg-dev rpm
-```
-
-### 4. Configure GitHub Token
-```bash
-# Set your GitHub Personal Access Token
-export GITHUB_TOKEN="your_github_token_here"
-```
-
-### 5. Run System Verification
-```bash
-cd scripts
-python verify_system.py
-```
-
-## 🎯 Usage
-
-### Automated Operation (Recommended)
-The system runs automatically via GitHub Actions:
-- **Monitoring**: Every 4 hours
-- **Website Deployment**: On any website changes
-- **Manual Triggers**: Available via GitHub Actions UI
-
-### Manual Operation
-```bash
-# Monitor AppImage repositories
-cd scripts
+# Run monitor
+export GITHUB_TOKEN="your_token"
 python monitor.py
 
-# Convert packages
+# Run converter (requires Docker image OR manual tool install)
 python converter.py
 ```
 
-## 📊 Current Status
+### Adding New Sources
 
-- **Total Applications**: 0 (system ready for monitoring)
-- **Configured Sources**: 1 (Cursor AI Editor via direct API)
-- **Supported Categories**: 6 (Development, Graphics, Productivity, Utilities, Media, Other)
-- **Package Formats**: AppImage, .deb, .rpm, .tar.gz
-- **Update Frequency**: Twice daily (8 AM and 8 PM UTC)
-- **Website Theme**: Dark mode optimized
+Edit `scripts/config.py`:
 
-## 🔧 Configuration
-
-### Monitored Repositories
-Edit `scripts/config.py` to add repositories:
 ```python
-APPIMAGE_REPOSITORIES = [
-    "AppImage/AppImageKit",
-    "AppImageCommunity/pkg2appimage",
-    # Add more repositories
-]
-```
-
-### Conversion Settings
-Modify conversion tools in `config.py`:
-```python
-CONVERSION_TOOLS = {
-    "appimage2deb": {
-        "timeout": 300,
-        "enabled": True
+DIRECT_API_ENDPOINTS = {
+    "your-app": {
+        "name": "Your App Name",
+        "category": "development",
+        "known_architectures": {
+            "x86_64": {
+                "api_url": "https://example.com/download/linux-x64"
+            }
+        }
     }
 }
 ```
 
-## 📚 Documentation
+## 🔧 How It Works
 
-- **[Setup Guide](docs/SETUP.md)** - Detailed installation and configuration
-- **[User Guide](docs/USER_GUIDE.md)** - Website usage and application downloads
-- **[Admin Guide](docs/ADMIN_GUIDE.md)** - System administration and maintenance
-- **[Developer Guide](docs/DEVELOPER.md)** - Development setup and contribution
-- **[Deployment Guide](docs/DEPLOYMENT.md)** - Production deployment instructions
-- **[API Reference](docs/API.md)** - JSON data structure and automation APIs
+### 1. Monitor Phase
+- Checks configured sources (Cursor API, GitHub repos, etc.)
+- Compares versions in `website/data/applications.json`
+- Marks new/updated apps as `conversion_status: "pending"`
+
+### 2. Convert Phase (runs if pending apps exist)
+- Pulls Docker image with conversion tools
+- Downloads AppImages for all architectures
+- Extracts with `unsquashfs` (cross-platform compatible)
+- Builds packages:
+  - **x86_64**: DEB (dpkg-deb), RPM (rpmbuild), TAR.GZ
+  - **aarch64**: DEB (dpkg-deb), RPM (FPM cross-compile), TAR.GZ
+  - **armv7l**: Same as aarch64 (if sources available)
+
+### 3. Upload Phase
+- Creates/updates GitHub Release (tag: `app-name-vX.X.X`)
+- Uploads all packages as release assets
+- Updates JSON with download URLs
+- Commits updated JSON to repo
+
+### 4. Website Update
+- GitHub Pages auto-deploys on JSON changes
+- Users browse catalog and download from releases
+
+## 📊 Current Status
+
+- **Applications**: 1 (Cursor AI Editor)
+- **Architectures**: x86_64, aarch64
+- **Package Formats**: DEB, RPM, TAR.GZ
+- **Update Frequency**: Twice daily (8 AM/PM UTC)
+- **Conversion Time**: ~7-9 minutes per run
 
 ## 🛠️ Technology Stack
 
-### Backend Automation
-- **Python 3.9+** with requests, PyGithub, BeautifulSoup4
-- **GitHub Actions** for CI/CD automation
-- **unsquashfs** and **dpkg-deb** for package conversion
+### Conversion Pipeline
+- **Python 3.11+** (monitoring & conversion logic)
+- **Docker** (containerized build environment)
+- **FPM** (Effing Package Management - ARM RPM cross-compilation)
+- **GitHub Actions** (CI/CD automation)
+- **GitHub Releases** (package storage)
 
-### Frontend Website
-- **HTML5/CSS3** with modern dark theme
-- **Vanilla JavaScript** for dynamic functionality
-- **Responsive design** for all device types
-- **GitHub Pages** for static hosting
+### Tools in Docker Image
+- `unsquashfs` - AppImage extraction
+- `dpkg-deb` - DEB package creation
+- `rpmbuild` - RPM package creation (x86_64)
+- `fpm` - RPM cross-compilation (ARM)
+- `gh` - GitHub CLI (release uploads)
 
-### Data Management
-- **JSON-based** application database
-- **Git version control** for data persistence
-- **Automated backups** via GitHub repository
+### Website
+- **Static HTML/CSS/JS** (dark theme)
+- **GitHub Pages** (hosting)
+- **JSON API** (application metadata)
 
-## 🔍 Troubleshooting
+## 🎯 Design Decisions
 
-### Common Issues
+### Why Docker?
+Pre-built image with all tools saves ~2 minutes per run vs installing on every workflow.
 
-**GitHub API Rate Limit**
-```bash
-Error: API rate limit exceeded
-Solution: Wait for reset or use authenticated token
-```
+### Why FPM for ARM RPMs?
+Native `rpmbuild` can't cross-compile. FPM builds ARM RPMs on x86_64 without QEMU overhead.
 
-**Conversion Tool Missing**
-```bash
-Error: unsquashfs tool not found
-Solution: sudo apt-get install squashfs-tools
-```
+### Why GitHub Releases?
+- No 100MB git file size limit
+- Free unlimited storage/bandwidth for public repos
+- Built-in CDN
+- Clean separation: git = metadata, releases = binaries
 
-**Permission Errors**
-```bash
-Error: Permission denied
-Solution: Check file permissions and GitHub token scope
-```
+### Why Preserve Conversion State?
+Only convert when version changes. Prevents wasting 8 minutes of CI time on every monitor run.
 
-## 🤝 Contributing
+## 📝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes and test locally
-4. Commit changes (`git commit -m 'Add amazing feature'`)
-5. Push to branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
-
-### Development Guidelines
-- Follow PEP 8 Python style guidelines
-- Add comprehensive error handling and logging
-- Include unit tests for new features
-- Update documentation for any changes
-
-## 📈 Performance & Limits
-
-### System Limits
-- **Repository Size**: 1 GB maximum (GitHub Pages)
-- **Bandwidth**: 100 GB/month (GitHub Pages)
-- **JSON File Size**: 1 MB maximum per file
-- **Package Size**: 100 MB maximum per converted package
-
-### Performance Optimizations
-- Efficient GitHub API rate limit management
-- Parallel processing for package conversion
-- Lazy loading for large application catalogs
-- Optimized asset compression and caching
-
-## 🔒 Security
-
-### Best Practices
-- GitHub Personal Access Token with minimal required permissions
-- Token stored as GitHub Secret, never in code
-- Package validation and checksum verification
-- Regular security updates for dependencies
+1. Fork the repo
+2. Create a feature branch
+3. Make changes and test locally
+4. Submit a pull request
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file
 
-## 🙏 Acknowledgments
+## 🔗 Links
 
-- **AppImage Project** for the universal packaging format
-- **FreeDesktop.org** for desktop entry specifications  
-- **GitHub** for hosting and automation platform
-- **Open Source Community** for conversion tools and libraries
-
-## 📞 Support
-
-- **Documentation**: Check the `/docs/` directory for detailed guides
-- **Issues**: Report bugs and feature requests on GitHub Issues
-- **Discussions**: Join GitHub Discussions for questions and ideas
-- **Logs**: Check GitHub Actions logs for troubleshooting
+- **Website**: [https://developmentcats.github.io/AppBinHub/](https://developmentcats.github.io/AppBinHub/)
+- **GitHub**: [https://github.com/DevelopmentCats/AppBinHub](https://github.com/DevelopmentCats/AppBinHub)
+- **Docker Image**: [ghcr.io/developmentcats/appbinhub-converter](https://github.com/DevelopmentCats/AppBinHub/pkgs/container/appbinhub-converter)
+- **Releases**: [GitHub Releases](https://github.com/DevelopmentCats/AppBinHub/releases)
 
 ---
 
-**Status**: ✅ System Ready | **Last Updated**: June 30, 2024 | **Version**: 1.0.0
+**Status**: ✅ Operational | **Last Updated**: 2026-02-08
