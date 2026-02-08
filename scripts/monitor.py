@@ -449,9 +449,24 @@ class AppImageMonitor:
         
         for record in new_records:
             if record['id'] in existing_ids:
-                # Update existing record
+                # Update existing record, preserving conversion state
                 for i, app in enumerate(self.data['applications']):
                     if app['id'] == record['id']:
+                        old_app = self.data['applications'][i]
+                        
+                        # Check if version changed (needs re-conversion)
+                        version_changed = old_app.get('version') != record.get('version')
+                        
+                        if version_changed:
+                            # New version - reset to pending
+                            logger.info(f"Version changed for {record['id']}: {old_app.get('version')} → {record.get('version')}")
+                            record['conversion_status'] = 'pending'
+                            record['converted_packages'] = {}
+                        else:
+                            # Same version - preserve conversion state
+                            record['conversion_status'] = old_app.get('conversion_status', 'pending')
+                            record['converted_packages'] = old_app.get('converted_packages', {})
+                        
                         self.data['applications'][i] = record
                         updated_count += 1
                         break
