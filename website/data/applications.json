@@ -18,13 +18,23 @@
       },
       "converted_packages": {
         "deb": {
-          "status": "pending"
+          "status": "failed"
         },
         "rpm": {
-          "status": "pending"
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v2.4.28/cursor-ai-editor-2.4.28-1.x86_64.rpm",
+          "size": "243.0 MB",
+          "checksum": "sha256:00e9345e2518e205fa78050bd1e07623292e4c8c35a3ca2892e407d38e4366fd",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-02-08T05:39:17.993008+00:00"
         },
         "tarball": {
-          "status": "pending"
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v2.4.28/cursor-ai-editor-2.4.28-x86_64.tar.gz",
+          "size": "284.1 MB",
+          "checksum": "sha256:7c0263e90b97914973b513e74f2d2eab3bec54c9e2b4be7e236884049f2e2a78",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-02-08T05:39:49.500653+00:00"
         }
       },
       "metadata": {
@@ -42,8 +52,8 @@
         "commit_sha": "f3f5cec40024283013878b50c4f9be4002e0b587",
         "release_date": "2026-02-08T05:34:52.814658+00:00"
       },
-      "last_updated": "2026-02-08T05:34:52.814676+00:00",
-      "conversion_status": "pending"
+      "last_updated": "2026-02-08T05:39:49.500815+00:00",
+      "conversion_status": "completed"
     },
     {
       "id": "cursor-ai-editor-aarch64",
@@ -63,13 +73,23 @@
       },
       "converted_packages": {
         "deb": {
-          "status": "pending"
+          "status": "failed"
         },
         "rpm": {
-          "status": "pending"
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v2.4.28/cursor-ai-editor-2.4.28-1.aarch64.rpm",
+          "size": "352.8 MB",
+          "checksum": "sha256:f4f8ce25c24beb52a7b82e5c41bb898c1a1aa41fe0e2eff0d34dc5aabd3ebfb5",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-02-08T05:43:39.942540+00:00"
         },
         "tarball": {
-          "status": "pending"
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v2.4.28/cursor-ai-editor-2.4.28-aarch64.tar.gz",
+          "size": "280.2 MB",
+          "checksum": "sha256:703f3388728edc21da958b4fb1c84d674776af4e9bfa9478c2ad358454c51785",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-02-08T05:44:10.175844+00:00"
         }
       },
       "metadata": {
@@ -85,8 +105,8 @@
         "commit_sha": "f3f5cec40024283013878b50c4f9be4002e0b587",
         "release_date": "2026-02-08T05:34:59.190195+00:00"
       },
-      "last_updated": "2026-02-08T05:34:59.190214+00:00",
-      "conversion_status": "pending"
+      "last_updated": "2026-02-08T05:44:10.175998+00:00",
+      "conversion_status": "completed"
     }
   ],
   "metadata": {
