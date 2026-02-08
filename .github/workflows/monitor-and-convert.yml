@@ -367,7 +367,7 @@ Automatically converted from AppImage by AppBinHub."""
       if: steps.check_results.outputs.json_changed == 'true'
       run: |
         git add website/data/applications.json
-        git commit -m "Convert: ${converted_count} apps across all architectures - $(date -u '+%Y-%m-%d %H:%M UTC')" || echo "Nothing to commit"
+        git commit -m "Convert: ${{ steps.check_results.outputs.converted_count }} apps across all architectures - $(date -u '+%Y-%m-%d %H:%M UTC')" || echo "Nothing to commit"
         git push || echo "Nothing to push"
     
     - name: Create summary
