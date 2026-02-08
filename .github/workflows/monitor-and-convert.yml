@@ -155,12 +155,16 @@ jobs:
     - name: Install conversion tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y dpkg-dev rpm file binutils squashfs-tools
+        sudo apt-get install -y dpkg-dev rpm file binutils squashfs-tools ruby-full
+        
+        # Install FPM for cross-architecture RPM building
+        sudo gem install --no-document fpm
         
         echo "Conversion tools installed:"
         echo "✓ dpkg-deb: $(dpkg-deb --version | head -1)"
         echo "✓ rpmbuild: $(rpmbuild --version | head -1 || echo 'not available')"
         echo "✓ unsquashfs: $(unsquashfs --version 2>&1 | head -1 || echo 'available')"
+        echo "✓ FPM: $(fpm --version)"
     
     - name: Configure Git
       run: |

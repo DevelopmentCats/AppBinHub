@@ -142,6 +142,18 @@ class ModernAppImageConverter:
             self.tools_available['rpmbuild'] = False
             logger.warning("rpmbuild tool not found")
         
+        # Check for FPM (for cross-architecture RPM creation)
+        try:
+            result = subprocess.run(['fpm', '--version'], 
+                                  capture_output=True, text=True, timeout=10)
+            if result.returncode == 0:
+                self.tools_available['fpm'] = True
+                logger.info("FPM tool is available for cross-architecture RPM creation")
+            else:
+                self.tools_available['fpm'] = False
+        except (subprocess.TimeoutExpired, FileNotFoundError):
+            self.tools_available['fpm'] = False
+        
         # Check for file utility (for file type detection)
         try:
             result = subprocess.run(['file', '--version'], 
@@ -511,24 +523,81 @@ Description: {app_data.get('description', app_data['name'])}
             logger.error(f"Error creating tarball: {e}")
             return None
     
+    def create_rpm_package_with_fpm(self, squashfs_root, app_data, architecture, output_dir):
+        """Create RPM package using FPM for cross-architecture support"""
+        if not self.tools_available.get('fpm', False):
+            return None
+        
+        try:
+            package_name = self.generate_package_name(app_data, 'rpm', architecture)
+            app_name = re.sub(r'[^a-z0-9\-]', '-', app_data['name'].lower())
+            
+            # Create staging directory
+            staging_dir = output_dir / 'fpm_staging'
+            staging_dir.mkdir(parents=True, exist_ok=True)
+            install_dir = staging_dir / 'opt' / app_name
+            install_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Copy files to staging
+            shutil.copytree(squashfs_root, install_dir, dirs_exist_ok=True)
+            
+            # Get RPM architecture name
+            rpm_arch = get_rpm_arch(architecture)
+            
+            # Build with FPM
+            result = subprocess.run([
+                'fpm',
+                '-s', 'dir',
+                '-t', 'rpm',
+                '-n', app_name,
+                '-v', app_data.get('version', '1.0.0'),
+                '--architecture', rpm_arch,
+                '--description', app_data.get('description', 'Converted from AppImage'),
+                '-C', str(staging_dir),
+                'opt'
+            ], capture_output=True, text=True, timeout=120, cwd=str(output_dir))
+            
+            if result.returncode == 0:
+                # Find generated RPM
+                rpm_files = list(output_dir.glob('*.rpm'))
+                if rpm_files:
+                    # Rename to expected name
+                    rpm_path = output_dir / package_name
+                    if rpm_files[0] != rpm_path:
+                        shutil.move(str(rpm_files[0]), str(rpm_path))
+                    logger.info(f"Successfully created RPM package with FPM: {rpm_path}")
+                    return rpm_path
+                else:
+                    logger.error("No RPM file found after FPM build")
+                    return None
+            else:
+                logger.error(f"FPM RPM creation failed: {result.stderr}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"Error creating RPM package with FPM: {e}")
+            return None
+    
     def create_rpm_package(self, squashfs_root, app_data, architecture, output_dir):
         """Create RPM package from extracted AppImage contents"""
-        if not self.tools_available.get('rpmbuild', False):
-            logger.warning("rpmbuild not available for RPM creation")
+        if not self.tools_available.get('rpmbuild', False) and not self.tools_available.get('fpm', False):
+            logger.warning("Neither rpmbuild nor FPM available for RPM creation")
             return None
         
         try:
             # Generate package name  
             package_name = self.generate_package_name(app_data, 'rpm', architecture)
             
-            # Create RPM build environment
-            rpm_build_dir = output_dir / 'rpm_build'
-            for subdir in ['BUILD', 'RPMS', 'SOURCES', 'SPECS', 'SRPMS']:
-                (rpm_build_dir / subdir).mkdir(parents=True, exist_ok=True)
-            
-            # Create spec file
-            app_name = re.sub(r'[^a-z0-9\-]', '-', app_data['name'].lower())
-            spec_content = f"""Name: {app_name}
+            # Try rpmbuild first (native builds)
+            if self.tools_available.get('rpmbuild', False):
+                # Create RPM build environment
+                rpm_build_dir = output_dir / 'rpm_build'
+                for subdir in ['BUILD', 'RPMS', 'SOURCES', 'SPECS', 'SRPMS']:
+                    (rpm_build_dir / subdir).mkdir(parents=True, exist_ok=True)
+                
+                # Create spec file
+                app_name = re.sub(r'[^a-z0-9\-]', '-', app_data['name'].lower())
+                spec_content = f"""Name: {app_name}
 Version: {app_data.get('version', '1.0.0')}
 Release: 1
 Summary: {app_data.get('description', app_data['name'])}
@@ -550,35 +619,46 @@ cp -r {squashfs_root}/* %{{buildroot}}/opt/{app_name}/
 * {datetime.now().strftime('%a %b %d %Y')} AppBinHub <automated@appbinhub.com>
 - Converted from AppImage
 """
-            
-            spec_file = rpm_build_dir / 'SPECS' / f"{app_name}.spec"
-            with open(spec_file, 'w') as f:
-                f.write(spec_content)
-            
-            # Build RPM with target architecture for cross-compilation
-            rpm_arch = get_rpm_arch(architecture)
-            result = subprocess.run([
-                'rpmbuild',
-                '--define', f'_topdir {rpm_build_dir}',
-                '--target', rpm_arch,
-                '-bb', str(spec_file)
-            ], capture_output=True, text=True, timeout=120)
-            
-            if result.returncode == 0:
-                # Find generated RPM
-                rpm_files = list((rpm_build_dir / 'RPMS').rglob('*.rpm'))
-                if rpm_files:
-                    # Move to output directory with correct name
-                    rpm_path = output_dir / package_name
-                    shutil.move(str(rpm_files[0]), str(rpm_path))
-                    logger.info(f"Successfully created RPM package: {rpm_path}")
-                    return rpm_path
+                
+                spec_file = rpm_build_dir / 'SPECS' / f"{app_name}.spec"
+                with open(spec_file, 'w') as f:
+                    f.write(spec_content)
+                
+                # Build RPM with target architecture for cross-compilation
+                rpm_arch = get_rpm_arch(architecture)
+                result = subprocess.run([
+                    'rpmbuild',
+                    '--define', f'_topdir {rpm_build_dir}',
+                    '--target', rpm_arch,
+                    '-bb', str(spec_file)
+                ], capture_output=True, text=True, timeout=120)
+                
+                if result.returncode == 0:
+                    # Find generated RPM
+                    rpm_files = list((rpm_build_dir / 'RPMS').rglob('*.rpm'))
+                    if rpm_files:
+                        # Move to output directory with correct name
+                        rpm_path = output_dir / package_name
+                        shutil.move(str(rpm_files[0]), str(rpm_path))
+                        logger.info(f"Successfully created RPM package: {rpm_path}")
+                        return rpm_path
+                    else:
+                        logger.error("No RPM file found after build")
                 else:
-                    logger.error("No RPM file found after build")
-                    return None
-            else:
-                logger.error(f"RPM creation failed: {result.stderr}")
-                return None
+                    # rpmbuild failed, try FPM if available
+                    if 'No compatible architectures' in result.stderr and self.tools_available.get('fpm', False):
+                        logger.warning(f"rpmbuild failed for cross-compilation, trying FPM: {result.stderr}")
+                        return self.create_rpm_package_with_fpm(squashfs_root, app_data, architecture, output_dir)
+                    else:
+                        logger.error(f"RPM creation failed: {result.stderr}")
+                        return None
+            
+            # If rpmbuild not available, try FPM directly
+            elif self.tools_available.get('fpm', False):
+                logger.info(f"Using FPM for RPM creation (rpmbuild not available)")
+                return self.create_rpm_package_with_fpm(squashfs_root, app_data, architecture, output_dir)
+            
+            return None
                 
         except Exception as e:
             logger.error(f"Error creating RPM package: {e}")
