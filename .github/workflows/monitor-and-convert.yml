@@ -152,13 +152,23 @@ jobs:
         cd scripts
         pip install -r requirements.txt
     
+    - name: Cache Ruby gems
+      uses: actions/cache@v3
+      with:
+        path: /var/lib/gems
+        key: gems-${{ runner.os }}-${{ hashFiles('.github/workflows/monitor-and-convert.yml') }}
+        restore-keys: |
+          gems-${{ runner.os }}-
+    
     - name: Install conversion tools
       run: |
         sudo apt-get update
         sudo apt-get install -y dpkg-dev rpm file binutils squashfs-tools ruby-full
         
-        # Install FPM for cross-architecture RPM building
-        sudo gem install --no-document fpm
+        # Install FPM for cross-architecture RPM building (cached)
+        if ! command -v fpm &> /dev/null; then
+          sudo gem install --no-document fpm
+        fi
         
         echo "Conversion tools installed:"
         echo "✓ dpkg-deb: $(dpkg-deb --version | head -1)"
