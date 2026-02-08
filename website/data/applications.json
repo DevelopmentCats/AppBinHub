@@ -1,9 +1,4 @@
 {
-  "metadata": {
-    "last_updated": "2026-02-08T03:57:35.671807+00:00",
-    "total_applications": 2,
-    "version": "1.0.0"
-  },
   "applications": [
     {
       "id": "cursor-ai-editor-x86_64",
@@ -23,18 +18,28 @@
       },
       "converted_packages": {
         "deb": {
-          "status": "pending"
+          "status": "failed"
         },
         "rpm": {
-          "status": "pending"
+          "url": "./packages/cursor-ai-editor/2.4.28/cursor-ai-editor-2.4.28-1.x86_64.rpm",
+          "size": "243.0 MB",
+          "checksum": "sha256:b8b416ec335ecb6933a44502c137d3446db4134d04b3e0c032f9ea7c67bca9e7",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-02-08T04:01:54.251459+00:00"
         },
         "tarball": {
-          "status": "pending"
+          "url": "./packages/cursor-ai-editor/2.4.28/cursor-ai-editor-2.4.28-x86_64.tar.gz",
+          "size": "284.2 MB",
+          "checksum": "sha256:d4e51a97162a48babad73551acb92656c546cbc7b95c8832c725279a0c99ab69",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-02-08T04:02:25.693616+00:00"
         }
       },
       "metadata": {
-        "icon": "/tmp/tmpqqsc7k4f/extracted/squashfs-root/co.anysphere.cursor.png",
-        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmpqqsc7k4f/extracted/squashfs-root/co.anysphere.cursor.png'}",
+        "icon": "/tmp/tmpsf4_l2p5/extracted/squashfs-root/co.anysphere.cursor.png",
+        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmpsf4_l2p5/extracted/squashfs-root/co.anysphere.cursor.png'}",
         "executable": "cursor %F",
         "mime_types": [
           "application/x-cursor-workspace"
@@ -45,10 +50,10 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-x64",
         "commit_sha": "f3f5cec40024283013878b50c4f9be4002e0b587",
-        "release_date": "2026-02-08T03:57:27.641554+00:00"
+        "release_date": "2026-02-08T03:46:42.188096+00:00"
       },
-      "last_updated": "2026-02-08T03:57:27.641582+00:00",
-      "conversion_status": "pending"
+      "last_updated": "2026-02-08T04:02:25.693780+00:00",
+      "conversion_status": "completed"
     },
     {
       "id": "cursor-ai-editor-aarch64",
@@ -88,9 +93,9 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-arm64",
         "commit_sha": "f3f5cec40024283013878b50c4f9be4002e0b587",
-        "release_date": "2026-02-08T03:57:35.623595+00:00"
+        "release_date": "2026-02-08T03:46:50.774451+00:00"
       },
-      "last_updated": "2026-02-08T03:57:35.623614+00:00",
+      "last_updated": "2026-02-08T03:46:50.774470+00:00",
       "conversion_status": "pending"
     }
   ]
