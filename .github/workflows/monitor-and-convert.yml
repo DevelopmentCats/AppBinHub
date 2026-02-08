@@ -296,17 +296,11 @@ jobs:
             if result.returncode != 0:
                 # Create release
                 print(f"Creating release {release_tag}...")
+                notes = f"Converted packages for {name} version {version}\n\n## Available Packages\n- DEB (Debian/Ubuntu)\n- RPM (Fedora/RHEL)\n- TAR.GZ (Universal)\n\nAutomatically converted from AppImage by AppBinHub."
                 subprocess.run([
                     'gh', 'release', 'create', release_tag,
                     '--title', f"{name} v{version}",
-                    '--notes', f"""Converted packages for {name} version {version}
-
-## Available Packages
-- DEB (Debian/Ubuntu)
-- RPM (Fedora/RHEL)
-- TAR.GZ (Universal)
-
-Automatically converted from AppImage by AppBinHub."""
+                    '--notes', notes
                 ], check=True)
             else:
                 print(f"Release {release_tag} already exists")
