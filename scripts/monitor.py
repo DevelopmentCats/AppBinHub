@@ -71,6 +71,13 @@ class AppImageMonitor:
         if self.applications_file.exists():
             with open(self.applications_file, 'r') as f:
                 self.data = json.load(f)
+            # Ensure metadata exists (backwards compatibility)
+            if 'metadata' not in self.data:
+                self.data['metadata'] = {
+                    "last_updated": datetime.now(timezone.utc).isoformat(),
+                    "total_applications": len(self.data.get('applications', [])),
+                    "version": "1.0.0"
+                }
         else:
             self.data = {
                 "metadata": {
