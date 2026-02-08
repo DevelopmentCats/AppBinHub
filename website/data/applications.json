@@ -18,23 +18,13 @@
       },
       "converted_packages": {
         "deb": {
-          "status": "failed"
+          "status": "pending"
         },
         "rpm": {
-          "url": "./packages/cursor-ai-editor/2.4.28/cursor-ai-editor-2.4.28-1.x86_64.rpm",
-          "size": "243.0 MB",
-          "checksum": "sha256:b8b416ec335ecb6933a44502c137d3446db4134d04b3e0c032f9ea7c67bca9e7",
-          "architecture": "x86_64",
-          "status": "available",
-          "created": "2026-02-08T04:01:54.251459+00:00"
+          "status": "pending"
         },
         "tarball": {
-          "url": "./packages/cursor-ai-editor/2.4.28/cursor-ai-editor-2.4.28-x86_64.tar.gz",
-          "size": "284.2 MB",
-          "checksum": "sha256:d4e51a97162a48babad73551acb92656c546cbc7b95c8832c725279a0c99ab69",
-          "architecture": "x86_64",
-          "status": "available",
-          "created": "2026-02-08T04:02:25.693616+00:00"
+          "status": "pending"
         }
       },
       "metadata": {
@@ -52,8 +42,8 @@
         "commit_sha": "f3f5cec40024283013878b50c4f9be4002e0b587",
         "release_date": "2026-02-08T03:46:42.188096+00:00"
       },
-      "last_updated": "2026-02-08T04:02:25.693780+00:00",
-      "conversion_status": "completed"
+      "last_updated": "2026-02-08T03:46:42.188114+00:00",
+      "conversion_status": "pending"
     },
     {
       "id": "cursor-ai-editor-aarch64",
@@ -73,13 +63,18 @@
       },
       "converted_packages": {
         "deb": {
-          "status": "pending"
+          "status": "failed"
         },
         "rpm": {
-          "status": "pending"
+          "status": "failed"
         },
         "tarball": {
-          "status": "pending"
+          "url": "./packages/cursor-ai-editor/2.4.28/cursor-ai-editor-2.4.28-aarch64.tar.gz",
+          "size": "280.3 MB",
+          "checksum": "sha256:e4107580b61096fffc89a15f1fb895c63811f56f31e5ff98c0e5ce176254a07d",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-02-08T04:05:49.728650+00:00"
         }
       },
       "metadata": {
@@ -95,8 +90,8 @@
         "commit_sha": "f3f5cec40024283013878b50c4f9be4002e0b587",
         "release_date": "2026-02-08T03:46:50.774451+00:00"
       },
-      "last_updated": "2026-02-08T03:46:50.774470+00:00",
-      "conversion_status": "pending"
+      "last_updated": "2026-02-08T04:05:49.728809+00:00",
+      "conversion_status": "completed"
     }
   ]
 }
