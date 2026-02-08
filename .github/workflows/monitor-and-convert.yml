@@ -122,16 +122,10 @@ jobs:
     if: needs.monitor.outputs.conversion_needed == 'true'
     needs: monitor
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     
     permissions:
       contents: write
-    
-    strategy:
-      fail-fast: false
-      max-parallel: 1  # Run sequentially to avoid merge conflicts on applications.json
-      matrix:
-        architecture: ['x86_64', 'aarch64', 'armv7l']
     
     steps:
     - name: Checkout repository
@@ -140,123 +134,52 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         fetch-depth: 0
     
-    - name: Filter apps by architecture
-      id: filter_apps
-      run: |
-        apps='${{ needs.monitor.outputs.apps_to_convert }}'
-        filtered_apps=$(echo "$apps" | jq -c "[.[] | select(.architecture == \"${{ matrix.architecture }}\")]")
-        echo "apps_for_arch=$filtered_apps" >> $GITHUB_OUTPUT
-        
-        if echo "$filtered_apps" | jq -e '. | length > 0' > /dev/null; then
-          echo "has_apps=true" >> $GITHUB_OUTPUT
-        else
-          echo "has_apps=false" >> $GITHUB_OUTPUT
-        fi
-    
     - name: Set up Python
-      if: steps.filter_apps.outputs.has_apps == 'true'
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
         cache: 'pip'
     
     - name: Install dependencies
-      if: steps.filter_apps.outputs.has_apps == 'true'
       run: |
         cd scripts
         pip install -r requirements.txt
     
     - name: Install conversion tools
-      if: steps.filter_apps.outputs.has_apps == 'true'
       run: |
         sudo apt-get update
         sudo apt-get install -y dpkg-dev rpm file binutils squashfs-tools
         
         echo "Conversion tools installed:"
         echo "✓ dpkg-deb: $(dpkg-deb --version | head -1)"
-        echo "✓ rpmbuild: $(command -v rpmbuild &> /dev/null && rpmbuild --version | head -1 || echo 'not available')"
-        echo "✓ unsquashfs: $(unsquashfs --help 2>&1 | head -1 || echo 'available as fallback')"
-    
-    - name: Set up QEMU for cross-architecture
-      if: steps.filter_apps.outputs.has_apps == 'true' && matrix.architecture != 'x86_64'
-      uses: docker/setup-qemu-action@v3
-      with:
-        platforms: linux/arm64,linux/arm/v7,linux/386
+        echo "✓ rpmbuild: $(rpmbuild --version | head -1 || echo 'not available')"
+        echo "✓ unsquashfs: $(unsquashfs --version 2>&1 | head -1 || echo 'available')"
     
     - name: Configure Git
-      if: steps.filter_apps.outputs.has_apps == 'true'
       run: |
         git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action Bot (${{ matrix.architecture }})"
+        git config --local user.name "GitHub Action Bot"
     
-    - name: Parse applications for conversion
-      if: steps.filter_apps.outputs.has_apps == 'true'
-      id: parse_apps
+    - name: Convert all architectures
       env:
-        INPUT_APPS: ${{ steps.filter_apps.outputs.apps_for_arch }}
-        TARGET_ARCH: ${{ matrix.architecture }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         cd scripts
         
-        apps_to_convert=$(python3 -c "
-        import json
-        import os
-        import sys
-        
-        input_apps = json.loads(os.environ['INPUT_APPS'])
-        target_arch = os.environ['TARGET_ARCH']
-        
-        print(f'Processing {len(input_apps)} apps for {target_arch}', file=sys.stderr)
-        
-        with open('../website/data/applications.json', 'r') as f:
-            data = json.load(f)
-        
-        apps_for_conversion = []
-        for app in data['applications']:
-            for input_app in input_apps:
-                if app['id'] == input_app['id'] and app.get('architecture') == target_arch:
-                    apps_for_conversion.append(app['id'])
-                    break
-        
-        print(f'Found {len(apps_for_conversion)} apps to convert', file=sys.stderr)
-        print(json.dumps(apps_for_conversion))
-        ")
-        
-        echo "apps_to_convert=$apps_to_convert" >> $GITHUB_OUTPUT
-        
-        if [ "$(echo "$apps_to_convert" | jq '. | length')" -gt 0 ]; then
-          echo "proceed=true" >> $GITHUB_OUTPUT
-        else
-          echo "proceed=false" >> $GITHUB_OUTPUT
-        fi
-    
-    - name: Convert applications
-      if: steps.parse_apps.outputs.proceed == 'true'
-      env:
-        APPS_TO_CONVERT: ${{ steps.parse_apps.outputs.apps_to_convert }}
-        TARGET_ARCH: ${{ matrix.architecture }}
-      run: |
-        cd scripts
-        
-        echo "Starting conversion for ${{ matrix.architecture }}..."
+        echo "🔄 Starting cross-compilation conversion..."
         echo "GitHub Runner: ${{ runner.os }} ${{ runner.arch }}"
         echo "Available disk space:"
         df -h
-        echo "Available memory:"
-        free -h || echo "Memory info not available"
         
+        # Convert all pending apps (all architectures in one pass)
         python3 -c "
         import sys
-        import os
         import json
         import time
         sys.path.append('.')
         from converter import ModernAppImageConverter
         
-        apps_to_convert = json.loads(os.environ['APPS_TO_CONVERT'])
-        target_arch = os.environ['TARGET_ARCH']
-        
-        print(f'Converting {len(apps_to_convert)} apps for {target_arch}')
+        print('Converting all pending applications...')
         print(f'Start time: {time.strftime(\"%Y-%m-%d %H:%M:%S UTC\", time.gmtime())}')
         
         try:
@@ -265,57 +188,52 @@ jobs:
             print(f'Error initializing converter: {e}')
             raise
         
-        original_apps = converter.data['applications']
-        converter.data['applications'] = [
-            app for app in original_apps 
-            if app['id'] in apps_to_convert and app.get('conversion_status') == 'pending'
-        ]
+        # Filter only pending apps
+        pending_apps = [app for app in converter.data['applications'] if app.get('conversion_status') == 'pending']
+        print(f'Found {len(pending_apps)} pending apps to convert')
         
-        print('Starting package conversion process...')
+        if len(pending_apps) == 0:
+            print('No pending apps to convert')
+            sys.exit(0)
+        
+        # Group by architecture for reporting
+        by_arch = {}
+        for app in pending_apps:
+            arch = app.get('architecture', 'unknown')
+            by_arch[arch] = by_arch.get(arch, 0) + 1
+        
+        for arch, count in by_arch.items():
+            print(f'  - {arch}: {count} apps')
+        
         converter.convert_pending_applications()
-        print('Package conversion completed successfully!')
-        
-        app_dict = {app['id']: app for app in converter.data['applications']}
-        for i, app in enumerate(original_apps):
-            if app['id'] in app_dict:
-                original_apps[i] = app_dict[app['id']]
-        
-        converter.data['applications'] = original_apps
-        converter.save_application_data()
         
         print(f'Conversion completed at: {time.strftime(\"%Y-%m-%d %H:%M:%S UTC\", time.gmtime())}')
         "
       continue-on-error: true
     
     - name: Check conversion results
-      if: steps.parse_apps.outputs.proceed == 'true'
       id: check_results
       run: |
-        cd scripts
-        
+        # Count converted apps
         converted_count=$(python3 -c "
         import json
-        with open('../website/data/applications.json', 'r') as f:
+        with open('website/data/applications.json', 'r') as f:
             data = json.load(f)
         
-        converted = 0
-        for app in data['applications']:
-            if app.get('architecture') == '${{ matrix.architecture }}' and app.get('conversion_status') == 'completed':
-                converted += 1
-        
+        converted = sum(1 for app in data['applications'] if app.get('conversion_status') == 'completed')
         print(converted)
         ")
         
         echo "converted_count=$converted_count" >> $GITHUB_OUTPUT
         
-        # Go back to root directory
-        cd ..
-        
         # Check if packages were created
         if [ -d "website/packages" ] && [ "$(find website/packages -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.tar.gz' \) 2>/dev/null | wc -l)" -gt 0 ]; then
           echo "packages_created=true" >> $GITHUB_OUTPUT
-          echo "✅ Packages created successfully"
-          find website/packages -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.tar.gz' \)
+          echo "✅ Packages created:"
+          find website/packages -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.tar.gz' \) | while read f; do
+            size=$(du -h "$f" | cut -f1)
+            echo "  - $(basename $f) ($size)"
+          done
         else
           echo "packages_created=false" >> $GITHUB_OUTPUT
           echo "❌ No packages created"
@@ -327,114 +245,95 @@ jobs:
           echo "✅ JSON updated"
         else
           echo "json_changed=false" >> $GITHUB_OUTPUT
-          echo "❌ JSON not changed"
+          echo "⚠️  JSON not changed"
         fi
     
     - name: Upload packages to GitHub Releases
       if: steps.check_results.outputs.packages_created == 'true'
-      id: upload_release
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        cd website/packages
-        
-        # Parse app info from JSON
-        app_info=$(python3 -c "
-        import json
-        import sys
-        
-        with open('../data/applications.json', 'r') as f:
-            data = json.load(f)
-        
-        # Find converted apps for this architecture
-        for app in data['applications']:
-            if app.get('architecture') == '${{ matrix.architecture }}' and app.get('conversion_status') == 'completed':
-                print(json.dumps({
-                    'id': app['id'],
-                    'base_id': app.get('base_id', app['id']),
-                    'name': app['name'],
-                    'version': app['version']
-                }))
-                break
-        ")
-        
-        if [ -z "$app_info" ]; then
-          echo "No converted apps found"
-          exit 0
-        fi
-        
-        base_id=$(echo "$app_info" | jq -r '.base_id')
-        version=$(echo "$app_info" | jq -r '.version')
-        name=$(echo "$app_info" | jq -r '.name')
-        
-        release_tag="${base_id}-v${version}"
-        echo "release_tag=$release_tag" >> $GITHUB_OUTPUT
-        
-        echo "📦 Uploading packages for release: $release_tag"
-        
-        # Find all packages for this app version
-        package_files=$(find "$base_id/$version" -type f \( -name '*.deb' -o -name '*.rpm' -o -name '*.tar.gz' \) 2>/dev/null || echo "")
-        
-        if [ -z "$package_files" ]; then
-          echo "No package files found to upload"
-          exit 0
-        fi
-        
-        # Create or update release
-        if gh release view "$release_tag" >/dev/null 2>&1; then
-          echo "Release $release_tag already exists, uploading assets..."
-        else
-          echo "Creating release $release_tag..."
-          gh release create "$release_tag" \
-            --title "$name v$version" \
-            --notes "Converted packages for $name version $version
-        
-        ## Available Packages
-        - DEB (Debian/Ubuntu)
-        - RPM (Fedora/RHEL)
-        - TAR.GZ (Universal)
-        
-        Automatically converted from AppImage by AppBinHub."
-        fi
-        
-        # Upload packages (overwrite if they exist)
-        echo "$package_files" | while read -r pkg; do
-          if [ -f "$pkg" ]; then
-            echo "Uploading: $pkg"
-            gh release upload "$release_tag" "$pkg" --clobber
-          fi
-        done
-        
-        echo "✅ Upload complete"
-    
-    - name: Update JSON with release URLs
-      if: steps.upload_release.outputs.release_tag != ''
       run: |
         python3 << 'PYEOF'
         import json
         import os
+        import subprocess
+        from pathlib import Path
         
-        release_tag = "${{ steps.upload_release.outputs.release_tag }}"
-        arch = "${{ matrix.architecture }}"
-        repo = "${{ github.repository }}"
-        
-        # Load JSON
+        # Load JSON to find converted apps
         with open('website/data/applications.json', 'r') as f:
             data = json.load(f)
         
-        # Update apps with release URLs
+        # Group converted apps by base_id/version
+        releases = {}
         for app in data['applications']:
-            if app.get('architecture') == arch and app.get('conversion_status') == 'completed':
+            if app.get('conversion_status') == 'completed':
                 base_id = app.get('base_id', app['id'])
                 version = app['version']
+                key = (base_id, version)
                 
-                # Update package URLs to point to GitHub Releases
+                if key not in releases:
+                    releases[key] = {
+                        'base_id': base_id,
+                        'version': version,
+                        'name': app['name'].split(' (')[0],  # Remove architecture suffix
+                        'apps': []
+                    }
+                releases[key]['apps'].append(app)
+        
+        repo = os.environ['GITHUB_REPOSITORY']
+        
+        # Create releases and upload packages
+        for (base_id, version), release_info in releases.items():
+            release_tag = f"{base_id}-v{version}"
+            name = release_info['name']
+            
+            print(f"\n📦 Processing release: {release_tag}")
+            
+            # Check if release exists
+            result = subprocess.run(['gh', 'release', 'view', release_tag], 
+                                  capture_output=True, text=True)
+            
+            if result.returncode != 0:
+                # Create release
+                print(f"Creating release {release_tag}...")
+                subprocess.run([
+                    'gh', 'release', 'create', release_tag,
+                    '--title', f"{name} v{version}",
+                    '--notes', f"""Converted packages for {name} version {version}
+
+## Available Packages
+- DEB (Debian/Ubuntu)
+- RPM (Fedora/RHEL)
+- TAR.GZ (Universal)
+
+Automatically converted from AppImage by AppBinHub."""
+                ], check=True)
+            else:
+                print(f"Release {release_tag} already exists")
+            
+            # Find and upload packages
+            package_dir = Path(f'website/packages/{base_id}/{version}')
+            if package_dir.exists():
+                packages = list(package_dir.glob('*.deb')) + \
+                          list(package_dir.glob('*.rpm')) + \
+                          list(package_dir.glob('*.tar.gz'))
+                
+                for pkg in packages:
+                    print(f"Uploading: {pkg.name}")
+                    subprocess.run([
+                        'gh', 'release', 'upload', release_tag, str(pkg), '--clobber'
+                    ], check=True)
+            
+            # Update JSON with release URLs
+            for app in release_info['apps']:
+                arch = app['architecture']
                 if 'converted_packages' in app:
                     packages = app['converted_packages']
                     
                     # DEB
                     if 'deb' in packages and packages['deb'].get('status') == 'available':
-                        filename = f"{base_id}_{version}_amd64.deb" if arch == 'x86_64' else f"{base_id}_{version}_arm64.deb"
+                        deb_arch = 'amd64' if arch == 'x86_64' else 'arm64' if arch == 'aarch64' else 'armhf'
+                        filename = f"{base_id}_{version}_{deb_arch}.deb"
                         packages['deb']['url'] = f"https://github.com/{repo}/releases/download/{release_tag}/{filename}"
                     
                     # RPM
@@ -452,11 +351,10 @@ jobs:
             json.dump(data, f, indent=2)
             f.write('\n')
         
-        print(f"✅ Updated JSON with release URLs for {release_tag}")
+        print(f"\n✅ Uploaded {len(releases)} releases")
         PYEOF
     
     - name: Clean up temporary files
-      if: steps.parse_apps.outputs.proceed == 'true'
       run: |
         cd scripts
         rm -f *.log
@@ -468,103 +366,21 @@ jobs:
     - name: Commit conversion results
       if: steps.check_results.outputs.json_changed == 'true'
       run: |
-        # Push with retry logic and smart merge
-        MAX_RETRIES=5
-        RETRY=0
-        
-        # Save our JSON changes
-        cp website/data/applications.json /tmp/our_apps.json
-        
-        until false; do
-          # Fetch latest from origin
-          git fetch origin main
-          
-          # Reset to remote main (start fresh each retry)
-          git reset --hard origin/main
-          
-          # Merge applications.json intelligently
-          python3 << 'PYEOF'
-        import json
-        
-        # Load our converted version and remote version
-        with open('/tmp/our_apps.json', 'r') as f:
-            our_data = json.load(f)
-        
-        with open('website/data/applications.json', 'r') as f:
-            remote_data = json.load(f)
-        
-        # Build lookup of our changes by app id
-        our_apps = {app['id']: app for app in our_data['applications']}
-        
-        # Start with remote apps, update with our converted versions
-        merged_apps = []
-        for app in remote_data['applications']:
-            if app['id'] in our_apps:
-                # Use our version (has conversion updates)
-                merged_apps.append(our_apps[app['id']])
-            else:
-                # Keep remote version (new from monitor)
-                merged_apps.append(app)
-        
-        # Add any apps that only exist in our version
-        our_only = set(our_apps.keys()) - set(app['id'] for app in remote_data['applications'])
-        for app_id in our_only:
-            merged_apps.append(our_apps[app_id])
-        
-        # Write merged result
-        result = {'applications': merged_apps}
-        with open('website/data/applications.json', 'w') as f:
-            json.dump(result, f, indent=2)
-            f.write('\n')
-        
-        print(f"✅ Merged {len(merged_apps)} applications")
-        PYEOF
-          
-          # Commit only JSON changes (packages are in releases)
-          git add website/data/applications.json
-          git commit -m "Convert: ${{ steps.check_results.outputs.converted_count }} apps for ${{ matrix.architecture }} - $(date -u '+%Y-%m-%d %H:%M UTC')"
-          
-          # Try to push
-          if git push origin main; then
-            echo "✅ Successfully pushed to main"
-            break
-          fi
-          
-          # Push failed, retry
-          RETRY=$((RETRY + 1))
-          if [ $RETRY -ge $MAX_RETRIES ]; then
-            echo "❌ Failed to push after $MAX_RETRIES attempts"
-            exit 1
-          fi
-          echo "⚠️  Push failed, retrying in 5s (attempt $RETRY/$MAX_RETRIES)..."
-          sleep 5
-        done
+        git add website/data/applications.json
+        git commit -m "Convert: ${converted_count} apps across all architectures - $(date -u '+%Y-%m-%d %H:%M UTC')" || echo "Nothing to commit"
+        git push || echo "Nothing to push"
     
     - name: Create summary
       if: always()
       run: |
-        echo "## 🔄 Conversion Summary (${{ matrix.architecture }})" >> $GITHUB_STEP_SUMMARY
-        echo "- **Architecture:** ${{ matrix.architecture }}" >> $GITHUB_STEP_SUMMARY
-        echo "- **Apps for this arch:** ${{ steps.filter_apps.outputs.has_apps }}" >> $GITHUB_STEP_SUMMARY
-        
-        if [ "${{ steps.filter_apps.outputs.has_apps }}" == "true" ]; then
-          echo "- **Apps converted:** ${{ steps.check_results.outputs.converted_count || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Changes committed:** ${{ steps.check_results.outputs.changes_made || 'N/A' }}" >> $GITHUB_STEP_SUMMARY
-          
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### Tools Status" >> $GITHUB_STEP_SUMMARY
-          echo "- **AppImage extraction:** Built-in method (primary)" >> $GITHUB_STEP_SUMMARY
-          echo "- **DEB packages:** $(dpkg-deb --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
-          echo "- **RPM packages:** $(rpmbuild --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
-          
-          if [ "${{ steps.parse_apps.outputs.apps_to_convert }}" != "[]" ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Apps Processed" >> $GITHUB_STEP_SUMMARY
-            echo '```json' >> $GITHUB_STEP_SUMMARY
-            echo '${{ steps.parse_apps.outputs.apps_to_convert }}' | jq . >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          fi
-        else
-          echo "- **Status:** No apps for this architecture" >> $GITHUB_STEP_SUMMARY
-        fi
+        echo "## 🔄 Cross-Compilation Conversion Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "- **Total apps converted:** ${{ steps.check_results.outputs.converted_count || '0' }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Packages created:** ${{ steps.check_results.outputs.packages_created }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **JSON updated:** ${{ steps.check_results.outputs.json_changed }}" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Tools" >> $GITHUB_STEP_SUMMARY
+        echo "- **Mode:** Cross-compilation (all architectures on x86_64 runner)" >> $GITHUB_STEP_SUMMARY
+        echo "- **DEB:** $(dpkg-deb --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
+        echo "- **RPM:** $(rpmbuild --version 2>&1 | head -1 || echo 'not available')" >> $GITHUB_STEP_SUMMARY
 

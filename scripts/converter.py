@@ -271,13 +271,23 @@ class ModernAppImageConverter:
             logger.error(f"Error with built-in extraction: {e}")
             return False
     
-    def extract_appimage(self, appimage_path, extract_dir):
-        """Extract AppImage using the reliable built-in method"""
-        # Use built-in AppImage extraction (most reliable for AppImages)
+    def extract_appimage(self, appimage_path, extract_dir, target_arch=None):
+        """Extract AppImage using the appropriate method for cross-compilation"""
+        import platform
+        host_arch = normalize_architecture(platform.machine())
+        
+        # If target arch is different from host, use unsquashfs (cross-compilation)
+        if target_arch and target_arch != host_arch:
+            logger.info(f"Cross-compiling: {target_arch} on {host_arch} - using unsquashfs")
+            if self.extract_appimage_with_unsquashfs(appimage_path, extract_dir):
+                return True
+            logger.error("unsquashfs extraction failed for cross-compilation")
+            return False
+        
+        # Native architecture: try built-in method first, fallback to unsquashfs
         if self.extract_appimage_builtin(appimage_path, extract_dir):
             return True
         
-        # Fallback to unsquashfs only if built-in fails
         logger.warning("Built-in extraction failed, trying unsquashfs as fallback")
         if self.extract_appimage_with_unsquashfs(appimage_path, extract_dir):
             return True
@@ -545,9 +555,12 @@ cp -r {squashfs_root}/* %{{buildroot}}/opt/{app_name}/
             with open(spec_file, 'w') as f:
                 f.write(spec_content)
             
-            # Build RPM
+            # Build RPM with target architecture for cross-compilation
+            rpm_arch = get_rpm_arch(architecture)
             result = subprocess.run([
-                'rpmbuild', '--define', f'_topdir {rpm_build_dir}',
+                'rpmbuild',
+                '--define', f'_topdir {rpm_build_dir}',
+                '--target', rpm_arch,
                 '-bb', str(spec_file)
             ], capture_output=True, text=True, timeout=120)
             
@@ -594,7 +607,7 @@ cp -r {squashfs_root}/* %{{buildroot}}/opt/{app_name}/
             extract_dir = temp_path / 'extracted'
             extract_dir.mkdir(exist_ok=True)
             
-            if not self.extract_appimage(appimage_path, extract_dir):
+            if not self.extract_appimage(appimage_path, extract_dir, target_arch=architecture):
                 logger.error("Failed to extract AppImage")
                 app_data['conversion_status'] = 'failed'
                 return False
