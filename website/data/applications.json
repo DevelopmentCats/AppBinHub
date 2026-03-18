@@ -5,21 +5,21 @@
       "base_id": "cursor-ai-editor",
       "name": "Cursor AI Editor (x86_64)",
       "description": "AI-powered code editor built for programming with artificial intelligence",
-      "version": "2.6.19",
+      "version": "2.6.20",
       "architecture": "x86_64",
       "category": [
         "development"
       ],
       "appimage": {
-        "url": "https://downloads.cursor.com/production/224838f96445be37e3db643a163a817c15b3606c/linux/x64/Cursor-2.6.19-x86_64.AppImage",
+        "url": "https://downloads.cursor.com/production/b29eb4ee5f9f6d1cb2afbc09070198d3ea6ad76f/linux/x64/Cursor-2.6.20-x86_64.AppImage",
         "size": "276.9 MB",
-        "checksum": "sha256:28f1dc63b2a17164e98853ef1d45e63f9ede3ce5b5a2e00d615b4531a4b33776",
+        "checksum": "sha256:7c4bc336715d2765a115a9bab70d6b9c36cd404666c6ca2b688bafac7b8acbec",
         "architecture": "x86_64"
       },
       "converted_packages": {},
       "metadata": {
-        "icon": "/tmp/tmpgkbwsz27/extracted/squashfs-root/co.anysphere.cursor.png",
-        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmpgkbwsz27/extracted/squashfs-root/co.anysphere.cursor.png'}",
+        "icon": "/tmp/tmp3fdtcn0s/extracted/squashfs-root/co.anysphere.cursor.png",
+        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmp3fdtcn0s/extracted/squashfs-root/co.anysphere.cursor.png'}",
         "executable": "cursor %F",
         "mime_types": [
           "application/x-cursor-workspace"
@@ -29,10 +29,10 @@
       "source": {
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-x64",
-        "commit_sha": "224838f96445be37e3db643a163a817c15b3606c",
-        "release_date": "2026-03-18T08:09:08.433360+00:00"
+        "commit_sha": "b29eb4ee5f9f6d1cb2afbc09070198d3ea6ad76f",
+        "release_date": "2026-03-18T20:07:27.188324+00:00"
       },
-      "last_updated": "2026-03-18T08:09:08.433379+00:00",
+      "last_updated": "2026-03-18T20:07:27.188342+00:00",
       "conversion_status": "pending"
     },
     {
@@ -40,15 +40,15 @@
       "base_id": "cursor-ai-editor",
       "name": "Cursor AI Editor (aarch64)",
       "description": "AI-powered code editor built for programming with artificial intelligence",
-      "version": "2.6.19",
+      "version": "2.6.20",
       "architecture": "aarch64",
       "category": [
         "development"
       ],
       "appimage": {
-        "url": "https://downloads.cursor.com/production/224838f96445be37e3db643a163a817c15b3606c/linux/arm64/Cursor-2.6.19-aarch64.AppImage",
+        "url": "https://downloads.cursor.com/production/b29eb4ee5f9f6d1cb2afbc09070198d3ea6ad76f/linux/arm64/Cursor-2.6.20-aarch64.AppImage",
         "size": "252.3 MB",
-        "checksum": "sha256:a325868ae3247c483055de5cdbc0967cf8d91cadda82d7eb599e78fc193873a1",
+        "checksum": "sha256:48488f34fd7066b2cdf9f5baab795d9e265803b9dd15fe29ece6ab3cebc2c628",
         "architecture": "aarch64"
       },
       "converted_packages": {},
@@ -62,15 +62,15 @@
       "source": {
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-arm64",
-        "commit_sha": "224838f96445be37e3db643a163a817c15b3606c",
-        "release_date": "2026-03-18T08:09:17.729446+00:00"
+        "commit_sha": "b29eb4ee5f9f6d1cb2afbc09070198d3ea6ad76f",
+        "release_date": "2026-03-18T20:07:38.276111+00:00"
       },
-      "last_updated": "2026-03-18T08:09:17.729467+00:00",
+      "last_updated": "2026-03-18T20:07:38.276131+00:00",
       "conversion_status": "pending"
     }
   ],
   "metadata": {
-    "last_updated": "2026-03-18T08:09:17.782285+00:00",
+    "last_updated": "2026-03-18T20:07:38.328791+00:00",
     "total_applications": 2,
     "version": "1.0.0"
   }
