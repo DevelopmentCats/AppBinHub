@@ -76,7 +76,32 @@
         "checksum": "sha256:3117e2dc412f044a313a9e5a30b16651a20a10697a2d3c7f58c3d6bf793265ea",
         "architecture": "aarch64"
       },
-      "converted_packages": {},
+      "converted_packages": {
+        "deb": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.1.15/cursor-ai-editor_3.1.15_arm64.deb",
+          "size": "273.6 MB",
+          "checksum": "sha256:c3c3e6f2447c71a05ec9e981ab0a9850c14416d66a6d67066749351f57760258",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-04-16T08:31:12.289869+00:00"
+        },
+        "rpm": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.1.15/cursor-ai-editor-3.1.15-1.aarch64.rpm",
+          "size": "367.9 MB",
+          "checksum": "sha256:ddbac169381569f44ae0f61ede32dc9d7f9f02e7e8871ba03c97396d435b427f",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-04-16T08:32:48.258976+00:00"
+        },
+        "tarball": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.1.15/cursor-ai-editor-3.1.15-aarch64.tar.gz",
+          "size": "295.3 MB",
+          "checksum": "sha256:fa2815cdaff1ebe8e5477cf3c913985823a8ec7aa3e1ffcf7590e0c815cacf66",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-04-16T08:33:17.559646+00:00"
+        }
+      },
       "metadata": {
         "icon": "https://us1.discourse-cdn.com/flex020/uploads/cursor1/original/2X/a/a4f78589d63edd61a2843306f8e11bad9590f0ca.png",
         "desktop_file": "",
@@ -90,8 +115,8 @@
         "commit_sha": "3a67af7b780e0bfc8d32aefa96b8ff1cb8817f88",
         "release_date": "2026-04-16T08:28:24.907410+00:00"
       },
-      "last_updated": "2026-04-16T08:28:24.907434+00:00",
-      "conversion_status": "pending"
+      "last_updated": "2026-04-16T08:33:17.559824+00:00",
+      "conversion_status": "completed"
     }
   ],
   "metadata": {
