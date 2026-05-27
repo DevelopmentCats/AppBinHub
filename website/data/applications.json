@@ -51,7 +51,32 @@
         "checksum": "sha256:5385c3929af73f3185df24976587054cf137e4384621e58129752f8ae90f8d50",
         "architecture": "aarch64"
       },
-      "converted_packages": {},
+      "converted_packages": {
+        "deb": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.5.38/cursor-ai-editor_3.5.38_arm64.deb",
+          "size": "278.3 MB",
+          "checksum": "sha256:f2500266c3a58f5e3ff371ee0802d66d406210bcae4f2dc7e413a119e99d408d",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-05-27T20:43:56.242214+00:00"
+        },
+        "rpm": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.5.38/cursor-ai-editor-3.5.38-1.aarch64.rpm",
+          "size": "373.1 MB",
+          "checksum": "sha256:8efb62c9fb94dbfbc475e5b1bd66ff8fde47e2d269e9ae111173149381bc2a25",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-05-27T20:45:13.669579+00:00"
+        },
+        "tarball": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.5.38/cursor-ai-editor-3.5.38-aarch64.tar.gz",
+          "size": "300.6 MB",
+          "checksum": "sha256:78dd47ae630424a303d0e5a45ae60bcbbae4170ecabe50f5e67e6a5e7800013e",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-05-27T20:45:37.543781+00:00"
+        }
+      },
       "metadata": {
         "icon": "https://us1.discourse-cdn.com/flex020/uploads/cursor1/original/2X/a/a4f78589d63edd61a2843306f8e11bad9590f0ca.png",
         "desktop_file": "",
@@ -65,8 +90,8 @@
         "commit_sha": "009bb5a3600dd98fe1c1f25798f767f686e14759",
         "release_date": "2026-05-27T20:38:59.761485+00:00"
       },
-      "last_updated": "2026-05-27T20:38:59.761503+00:00",
-      "conversion_status": "pending"
+      "last_updated": "2026-05-27T20:45:37.543957+00:00",
+      "conversion_status": "completed"
     }
   ],
   "metadata": {
