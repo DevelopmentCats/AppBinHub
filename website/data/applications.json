@@ -16,7 +16,32 @@
         "checksum": "sha256:eb32214b3e5fc4430b03ccddea866dc0d0d43005bae5b66efdf60c495fc8ba1d",
         "architecture": "x86_64"
       },
-      "converted_packages": {},
+      "converted_packages": {
+        "deb": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.6.21/cursor-ai-editor_3.6.21_amd64.deb",
+          "size": "286.2 MB",
+          "checksum": "sha256:e1080186edef1b0834d3b83a6692d522b5a3a4e8475d5ca3ad5d1a030a9ebb28",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-05-31T20:23:40.057001+00:00"
+        },
+        "rpm": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.6.21/cursor-ai-editor-3.6.21-1.x86_64.rpm",
+          "size": "255.0 MB",
+          "checksum": "sha256:01c1da46b26f80c86e2c9ad7cf3b9467acb92c05179e396c9896f9381d86b3a8",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-05-31T20:24:47.001690+00:00"
+        },
+        "tarball": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.6.21/cursor-ai-editor-3.6.21-x86_64.tar.gz",
+          "size": "305.0 MB",
+          "checksum": "sha256:74572707b5e80f0aa8d675ef2cb9ea899ae46e36711d3a7203e8be46f4f3bc5a",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-05-31T20:25:11.008871+00:00"
+        }
+      },
       "metadata": {
         "icon": "/tmp/tmp_w644qni/extracted/squashfs-root/co.anysphere.cursor.png",
         "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmp_w644qni/extracted/squashfs-root/co.anysphere.cursor.png'}",
@@ -32,8 +57,8 @@
         "commit_sha": "e7a7e93f4d75f8272503ecf33cedbaae10114a15",
         "release_date": "2026-05-31T20:20:50.657052+00:00"
       },
-      "last_updated": "2026-05-31T20:20:50.657067+00:00",
-      "conversion_status": "pending"
+      "last_updated": "2026-05-31T20:25:11.009025+00:00",
+      "conversion_status": "completed"
     },
     {
       "id": "cursor-ai-editor-aarch64",
@@ -51,7 +76,32 @@
         "checksum": "sha256:e43c66a6f154a8dc9b6c749107a46533dc95cc52874a85c89040f2820d1bff90",
         "architecture": "aarch64"
       },
-      "converted_packages": {},
+      "converted_packages": {
+        "deb": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.6.21/cursor-ai-editor_3.6.21_arm64.deb",
+          "size": "277.5 MB",
+          "checksum": "sha256:50366aaaeae7befa655bad0ca23ef05822c09a4f46413726409ee99d40e8b42b",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-05-31T20:27:12.466931+00:00"
+        },
+        "rpm": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.6.21/cursor-ai-editor-3.6.21-1.aarch64.rpm",
+          "size": "372.1 MB",
+          "checksum": "sha256:1bb5b07ff00e7c26311cf4c88bf119f82df51edf749f934667a2ffe21cb5e2db",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-05-31T20:28:26.003081+00:00"
+        },
+        "tarball": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.6.21/cursor-ai-editor-3.6.21-aarch64.tar.gz",
+          "size": "299.5 MB",
+          "checksum": "sha256:f4aa52ff8c2fe709b588e54c2265b2e7c4e2819c7ca3abd169234db1ef40484e",
+          "architecture": "aarch64",
+          "status": "available",
+          "created": "2026-05-31T20:28:49.526580+00:00"
+        }
+      },
       "metadata": {
         "icon": "https://us1.discourse-cdn.com/flex020/uploads/cursor1/original/2X/a/a4f78589d63edd61a2843306f8e11bad9590f0ca.png",
         "desktop_file": "",
@@ -65,8 +115,8 @@
         "commit_sha": "e7a7e93f4d75f8272503ecf33cedbaae10114a15",
         "release_date": "2026-05-31T20:20:56.215862+00:00"
       },
-      "last_updated": "2026-05-31T20:20:56.215880+00:00",
-      "conversion_status": "pending"
+      "last_updated": "2026-05-31T20:28:49.526726+00:00",
+      "conversion_status": "completed"
     }
   ],
   "metadata": {
