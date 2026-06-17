@@ -12,14 +12,14 @@
       ],
       "appimage": {
         "url": "https://downloads.cursor.com/production/5702c9cfca656d8710fad58402fe37f14345e3ac/linux/x64/Cursor-3.7.42-x86_64.AppImage",
-        "size": "295.1 MB",
-        "checksum": "sha256:a819194bdeca03e23077f1fdc024460f1cddabfb30cca533fa30500c47ac2a6e",
+        "size": "272.1 MB",
+        "checksum": "sha256:a3b736db47ac1a3daaacb0edf3ccd0f97a4031b8491a8932e6234507faa1bed5",
         "architecture": "x86_64"
       },
       "converted_packages": {},
       "metadata": {
-        "icon": "/tmp/tmp_9y1fcre/extracted/squashfs-root/co.anysphere.cursor.png",
-        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmp_9y1fcre/extracted/squashfs-root/co.anysphere.cursor.png'}",
+        "icon": "/tmp/tmp74887bns/extracted/squashfs-root/co.anysphere.cursor.png",
+        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmp74887bns/extracted/squashfs-root/co.anysphere.cursor.png'}",
         "executable": "cursor %F",
         "mime_types": [
           "application/x-cursor-workspace"
@@ -30,9 +30,9 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-x64",
         "commit_sha": "5702c9cfca656d8710fad58402fe37f14345e3ac",
-        "release_date": "2026-06-17T09:29:06.566422+00:00"
+        "release_date": "2026-06-17T20:38:15.444720+00:00"
       },
-      "last_updated": "2026-06-17T09:29:06.566443+00:00",
+      "last_updated": "2026-06-17T20:38:15.444738+00:00",
       "conversion_status": "pending"
     },
     {
@@ -48,7 +48,7 @@
       "appimage": {
         "url": "https://downloads.cursor.com/production/5702c9cfca656d8710fad58402fe37f14345e3ac/linux/arm64/Cursor-3.7.42-aarch64.AppImage",
         "size": "266.4 MB",
-        "checksum": "sha256:0f7030e0b4b4925f6bc4225c9606c4649ee6d27ed90c007bcada2a9e9108a196",
+        "checksum": "sha256:3e356055e99163aeb363f8177206025734b0902e5a08978cb0dade71e433588e",
         "architecture": "aarch64"
       },
       "converted_packages": {},
@@ -63,14 +63,14 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-arm64",
         "commit_sha": "5702c9cfca656d8710fad58402fe37f14345e3ac",
-        "release_date": "2026-06-17T09:29:16.636532+00:00"
+        "release_date": "2026-06-17T20:38:24.409345+00:00"
       },
-      "last_updated": "2026-06-17T09:29:16.636553+00:00",
+      "last_updated": "2026-06-17T20:38:24.409364+00:00",
       "conversion_status": "pending"
     }
   ],
   "metadata": {
-    "last_updated": "2026-06-17T09:29:16.670691+00:00",
+    "last_updated": "2026-06-17T20:38:24.430295+00:00",
     "total_applications": 2,
     "version": "1.0.0"
   }
