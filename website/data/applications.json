@@ -18,8 +18,8 @@
       },
       "converted_packages": {},
       "metadata": {
-        "icon": "/tmp/tmpopr3tlxe/extracted/squashfs-root/co.anysphere.cursor.png",
-        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmpopr3tlxe/extracted/squashfs-root/co.anysphere.cursor.png'}",
+        "icon": "/tmp/tmplgg8npip/extracted/squashfs-root/co.anysphere.cursor.png",
+        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmplgg8npip/extracted/squashfs-root/co.anysphere.cursor.png'}",
         "executable": "cursor %F",
         "mime_types": [
           "application/x-cursor-workspace"
@@ -30,9 +30,9 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-x64",
         "commit_sha": "de07bee81cefe43461ebf4f40c3d2d78d15052aa",
-        "release_date": "2026-08-13T08:58:16.264519+00:00"
+        "release_date": "2026-08-13T20:25:50.649920+00:00"
       },
-      "last_updated": "2026-08-13T08:58:16.264537+00:00",
+      "last_updated": "2026-08-13T20:25:50.649941+00:00",
       "conversion_status": "pending"
     },
     {
@@ -48,7 +48,7 @@
       "appimage": {
         "url": "https://downloads.cursor.com/production/de07bee81cefe43461ebf4f40c3d2d78d15052aa/linux/arm64/Cursor-3.15.19-aarch64.AppImage",
         "size": "278.0 MB",
-        "checksum": "sha256:35d0c66fe7a2a8e94fe40c8e5bc8d57daf4fb3ace5c4f430837c706156d82ec9",
+        "checksum": "sha256:3595588b2bb4da54a9a9561cdb86f3c2b87b5dcd61873b8766736fabd0509708",
         "architecture": "aarch64"
       },
       "converted_packages": {},
@@ -63,14 +63,14 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-arm64",
         "commit_sha": "de07bee81cefe43461ebf4f40c3d2d78d15052aa",
-        "release_date": "2026-08-12T20:28:29.603716+00:00"
+        "release_date": "2026-08-13T20:25:57.844532+00:00"
       },
-      "last_updated": "2026-08-12T20:28:29.603746+00:00",
+      "last_updated": "2026-08-13T20:25:57.844555+00:00",
       "conversion_status": "failed"
     }
   ],
   "metadata": {
-    "last_updated": "2026-08-13T08:58:16.826302+00:00",
+    "last_updated": "2026-08-13T20:25:57.881190+00:00",
     "total_applications": 2,
     "version": "1.0.0"
   }
