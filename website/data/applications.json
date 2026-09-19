@@ -16,7 +16,32 @@
         "checksum": "sha256:b82b12aecdc02bdcffb98c8cd742f33f72e1760cc3f090f7b4acb241ebaabbd0",
         "architecture": "x86_64"
       },
-      "converted_packages": {},
+      "converted_packages": {
+        "deb": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.21.16/cursor-ai-editor_3.21.16_amd64.deb",
+          "size": "312.1 MB",
+          "checksum": "sha256:134f7f44f7ac726ff1157adb1e01d720222b8432230eaf07d1ebe72ded54229c",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-09-19T21:51:55.798091+00:00"
+        },
+        "rpm": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.21.16/cursor-ai-editor-3.21.16-1.x86_64.rpm",
+          "size": "285.7 MB",
+          "checksum": "sha256:ccbe7ddcf4dba6fa7c06cf2ed5a121ca64160ca75571b64c565e9521151d51a6",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-09-19T21:53:09.194018+00:00"
+        },
+        "tarball": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.21.16/cursor-ai-editor-3.21.16-x86_64.tar.gz",
+          "size": "325.3 MB",
+          "checksum": "sha256:1219e02fb0e92d50e1170085de4d1d18cba0b567b542893429d76b4f375b2e80",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-09-19T21:53:36.277517+00:00"
+        }
+      },
       "metadata": {
         "icon": "/tmp/tmplmicp66z/extracted/squashfs-root/co.anysphere.cursor.png",
         "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmplmicp66z/extracted/squashfs-root/co.anysphere.cursor.png'}",
@@ -32,8 +57,8 @@
         "commit_sha": "8ae78e8eee1e63479c7e0504b664bc0a80c6800f",
         "release_date": "2026-09-19T21:49:10.534262+00:00"
       },
-      "last_updated": "2026-09-19T21:49:10.534280+00:00",
-      "conversion_status": "pending"
+      "last_updated": "2026-09-19T21:53:36.277650+00:00",
+      "conversion_status": "completed"
     },
     {
       "id": "cursor-ai-editor-aarch64",
@@ -66,7 +91,7 @@
         "release_date": "2026-09-19T21:49:15.631794+00:00"
       },
       "last_updated": "2026-09-19T21:49:15.631813+00:00",
-      "conversion_status": "pending"
+      "conversion_status": "failed"
     }
   ],
   "metadata": {
