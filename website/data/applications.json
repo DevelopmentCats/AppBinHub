@@ -5,46 +5,21 @@
       "base_id": "cursor-ai-editor",
       "name": "Cursor AI Editor (x86_64)",
       "description": "AI-powered code editor built for programming with artificial intelligence",
-      "version": "3.21.16",
+      "version": "3.21.18",
       "architecture": "x86_64",
       "category": [
         "development"
       ],
       "appimage": {
-        "url": "https://downloads.cursor.com/production/8ae78e8eee1e63479c7e0504b664bc0a80c6800f/linux/x64/Cursor-3.21.16-x86_64.AppImage",
-        "size": "290.5 MB",
-        "checksum": "sha256:b82b12aecdc02bdcffb98c8cd742f33f72e1760cc3f090f7b4acb241ebaabbd0",
+        "url": "https://downloads.cursor.com/production/c4730f7d93d787d9ab120af715999f0345ee5bc5/linux/x64/Cursor-3.21.18-x86_64.AppImage",
+        "size": "290.6 MB",
+        "checksum": "sha256:d17c9638dd157ad47f645344151d40dfcdc5b07c6eede31164704e0eadea78d6",
         "architecture": "x86_64"
       },
-      "converted_packages": {
-        "deb": {
-          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.21.16/cursor-ai-editor_3.21.16_amd64.deb",
-          "size": "312.1 MB",
-          "checksum": "sha256:134f7f44f7ac726ff1157adb1e01d720222b8432230eaf07d1ebe72ded54229c",
-          "architecture": "x86_64",
-          "status": "available",
-          "created": "2026-09-19T21:51:55.798091+00:00"
-        },
-        "rpm": {
-          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.21.16/cursor-ai-editor-3.21.16-1.x86_64.rpm",
-          "size": "285.7 MB",
-          "checksum": "sha256:ccbe7ddcf4dba6fa7c06cf2ed5a121ca64160ca75571b64c565e9521151d51a6",
-          "architecture": "x86_64",
-          "status": "available",
-          "created": "2026-09-19T21:53:09.194018+00:00"
-        },
-        "tarball": {
-          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.21.16/cursor-ai-editor-3.21.16-x86_64.tar.gz",
-          "size": "325.3 MB",
-          "checksum": "sha256:1219e02fb0e92d50e1170085de4d1d18cba0b567b542893429d76b4f375b2e80",
-          "architecture": "x86_64",
-          "status": "available",
-          "created": "2026-09-19T21:53:36.277517+00:00"
-        }
-      },
+      "converted_packages": {},
       "metadata": {
-        "icon": "/tmp/tmpomoh9yzc/extracted/squashfs-root/co.anysphere.cursor.png",
-        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmpomoh9yzc/extracted/squashfs-root/co.anysphere.cursor.png'}",
+        "icon": "/tmp/tmpq3k9zmh5/extracted/squashfs-root/co.anysphere.cursor.png",
+        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmpq3k9zmh5/extracted/squashfs-root/co.anysphere.cursor.png'}",
         "executable": "cursor %F",
         "mime_types": [
           "application/x-cursor-workspace"
@@ -54,26 +29,26 @@
       "source": {
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-x64",
-        "commit_sha": "8ae78e8eee1e63479c7e0504b664bc0a80c6800f",
-        "release_date": "2026-09-22T12:51:42.602240+00:00"
+        "commit_sha": "c4730f7d93d787d9ab120af715999f0345ee5bc5",
+        "release_date": "2026-09-22T22:26:52.124098+00:00"
       },
-      "last_updated": "2026-09-22T12:51:42.602257+00:00",
-      "conversion_status": "completed"
+      "last_updated": "2026-09-22T22:26:52.124120+00:00",
+      "conversion_status": "pending"
     },
     {
       "id": "cursor-ai-editor-aarch64",
       "base_id": "cursor-ai-editor",
       "name": "Cursor AI Editor (aarch64)",
       "description": "AI-powered code editor built for programming with artificial intelligence",
-      "version": "3.21.16",
+      "version": "3.21.18",
       "architecture": "aarch64",
       "category": [
         "development"
       ],
       "appimage": {
-        "url": "https://downloads.cursor.com/production/8ae78e8eee1e63479c7e0504b664bc0a80c6800f/linux/arm64/Cursor-3.21.16-aarch64.AppImage",
+        "url": "https://downloads.cursor.com/production/c4730f7d93d787d9ab120af715999f0345ee5bc5/linux/arm64/Cursor-3.21.18-aarch64.AppImage",
         "size": "287.8 MB",
-        "checksum": "sha256:aaed531297a0bdd5da190996b429d2766c11db233acd5dd252fadd06531bb5f6",
+        "checksum": "sha256:9f54d6939b2e41caf83d55cb25133a6f2730c46f235cd66bf59b51fae3c3d4d3",
         "architecture": "aarch64"
       },
       "converted_packages": {},
@@ -87,15 +62,15 @@
       "source": {
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-arm64",
-        "commit_sha": "8ae78e8eee1e63479c7e0504b664bc0a80c6800f",
-        "release_date": "2026-09-22T12:51:51.411291+00:00"
+        "commit_sha": "c4730f7d93d787d9ab120af715999f0345ee5bc5",
+        "release_date": "2026-09-22T22:26:58.848579+00:00"
       },
-      "last_updated": "2026-09-22T12:51:51.411309+00:00",
-      "conversion_status": "failed"
+      "last_updated": "2026-09-22T22:26:58.848603+00:00",
+      "conversion_status": "pending"
     }
   ],
   "metadata": {
-    "last_updated": "2026-09-22T12:51:51.446468+00:00",
+    "last_updated": "2026-09-22T22:26:58.885146+00:00",
     "total_applications": 2,
     "version": "1.0.0"
   }
