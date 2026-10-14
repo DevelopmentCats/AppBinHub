@@ -16,7 +16,32 @@
         "checksum": "sha256:04ed7d3ea19096a2861f3bbba6a96622254316aa6b23bfb4d5317b4f655ba28e",
         "architecture": "x86_64"
       },
-      "converted_packages": {},
+      "converted_packages": {
+        "deb": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.24.18/cursor-ai-editor_3.24.18_amd64.deb",
+          "size": "314.4 MB",
+          "checksum": "sha256:3eef305f7e9da41dd1972ca6a7f71bea4ce006fcf14f9cb588ec41264d504109",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-10-14T22:46:14.863898+00:00"
+        },
+        "rpm": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.24.18/cursor-ai-editor-3.24.18-1.x86_64.rpm",
+          "size": "288.0 MB",
+          "checksum": "sha256:14ef96a60179fbb16898567deda73df6e73f2b1b15abf43be41603b8b362436e",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-10-14T22:47:24.977185+00:00"
+        },
+        "tarball": {
+          "url": "https://github.com/DevelopmentCats/AppBinHub/releases/download/cursor-ai-editor-v3.24.18/cursor-ai-editor-3.24.18-x86_64.tar.gz",
+          "size": "327.9 MB",
+          "checksum": "sha256:c1ae2eb43845ee04f36aa5a0ea68879a1fc3b54cb1d28f68740a879e149f1b28",
+          "architecture": "x86_64",
+          "status": "available",
+          "created": "2026-10-14T22:47:50.857246+00:00"
+        }
+      },
       "metadata": {
         "icon": "/tmp/tmplo_cl1yi/extracted/squashfs-root/co.anysphere.cursor.png",
         "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmplo_cl1yi/extracted/squashfs-root/co.anysphere.cursor.png'}",
@@ -32,8 +57,8 @@
         "commit_sha": "be4c9e5350d77747b42cd467cbd3370a753d464b",
         "release_date": "2026-10-14T22:43:39.006621+00:00"
       },
-      "last_updated": "2026-10-14T22:43:39.006644+00:00",
-      "conversion_status": "pending"
+      "last_updated": "2026-10-14T22:47:50.857387+00:00",
+      "conversion_status": "completed"
     },
     {
       "id": "cursor-ai-editor-aarch64",
