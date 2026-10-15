@@ -43,8 +43,8 @@
         }
       },
       "metadata": {
-        "icon": "/tmp/tmplo_cl1yi/extracted/squashfs-root/co.anysphere.cursor.png",
-        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmplo_cl1yi/extracted/squashfs-root/co.anysphere.cursor.png'}",
+        "icon": "/tmp/tmplkqu7jom/extracted/squashfs-root/co.anysphere.cursor.png",
+        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmplkqu7jom/extracted/squashfs-root/co.anysphere.cursor.png'}",
         "executable": "cursor %F",
         "mime_types": [
           "application/x-cursor-workspace"
@@ -55,9 +55,9 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-x64",
         "commit_sha": "be4c9e5350d77747b42cd467cbd3370a753d464b",
-        "release_date": "2026-10-14T22:43:39.006621+00:00"
+        "release_date": "2026-10-15T12:53:26.723302+00:00"
       },
-      "last_updated": "2026-10-14T22:47:50.857387+00:00",
+      "last_updated": "2026-10-15T12:53:26.723317+00:00",
       "conversion_status": "completed"
     },
     {
@@ -88,14 +88,14 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-arm64",
         "commit_sha": "be4c9e5350d77747b42cd467cbd3370a753d464b",
-        "release_date": "2026-10-14T22:43:45.051266+00:00"
+        "release_date": "2026-10-15T12:53:33.260649+00:00"
       },
-      "last_updated": "2026-10-14T22:43:45.051293+00:00",
+      "last_updated": "2026-10-15T12:53:33.260665+00:00",
       "conversion_status": "failed"
     }
   ],
   "metadata": {
-    "last_updated": "2026-10-14T22:43:45.072988+00:00",
+    "last_updated": "2026-10-15T12:53:33.296229+00:00",
     "total_applications": 2,
     "version": "1.0.0"
   }
