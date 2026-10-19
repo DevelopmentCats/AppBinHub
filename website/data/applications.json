@@ -18,8 +18,8 @@
       },
       "converted_packages": {},
       "metadata": {
-        "icon": "/tmp/tmp3x7j9fjg/extracted/squashfs-root/co.anysphere.cursor.png",
-        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmp3x7j9fjg/extracted/squashfs-root/co.anysphere.cursor.png'}",
+        "icon": "/tmp/tmpsn1wdf3s/extracted/squashfs-root/co.anysphere.cursor.png",
+        "desktop_file": "{'name': 'Cursor', 'description': 'The AI Code Editor.', 'executable': 'cursor %F', 'icon': 'co.anysphere.cursor', 'categories': ['TextEditor', 'Development', 'IDE'], 'mime_types': ['application/x-cursor-workspace'], 'icon_path': '/tmp/tmpsn1wdf3s/extracted/squashfs-root/co.anysphere.cursor.png'}",
         "executable": "cursor %F",
         "mime_types": [
           "application/x-cursor-workspace"
@@ -30,9 +30,9 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-x64",
         "commit_sha": "5d4df965746c5d09740842fc0f1331ba1c15783d",
-        "release_date": "2026-10-19T15:01:36.483217+00:00"
+        "release_date": "2026-10-19T23:09:52.205430+00:00"
       },
-      "last_updated": "2026-10-19T15:01:36.483238+00:00",
+      "last_updated": "2026-10-19T23:09:52.205444+00:00",
       "conversion_status": "pending"
     },
     {
@@ -63,14 +63,14 @@
         "website": "https://cursor.com",
         "api_url": "https://www.cursor.com/api/download?releaseTrack=stable&platform=linux-arm64",
         "commit_sha": "5d4df965746c5d09740842fc0f1331ba1c15783d",
-        "release_date": "2026-10-19T15:01:42.744590+00:00"
+        "release_date": "2026-10-19T23:10:00.444522+00:00"
       },
-      "last_updated": "2026-10-19T15:01:42.744613+00:00",
+      "last_updated": "2026-10-19T23:10:00.444541+00:00",
       "conversion_status": "failed"
     }
   ],
   "metadata": {
-    "last_updated": "2026-10-19T15:01:42.781825+00:00",
+    "last_updated": "2026-10-19T23:10:00.479869+00:00",
     "total_applications": 2,
     "version": "1.0.0"
   }
